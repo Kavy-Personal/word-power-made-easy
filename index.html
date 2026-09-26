@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-black select-none">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Word Power Made Easy — Norman Lewis</title>
+  
+  <!-- Open Graph & Standalone Web App Meta -->
+  <meta name="description" content="Minimalist, responsive continuous-scrolling digital reader for Norman Lewis's Word Power Made Easy with isolated e-ink and night invert filters." />
+  <meta property="og:title" content="Word Power Made Easy — Digital Reader" />
+  <meta property="og:description" content="Continuous vertical scroll reader with edge-to-edge mobile fitting, bookmarks, and isolated night inversion." />
+  <meta property="og:type" content="book" />
+  <meta name="author" content="Norman Lewis" />
+
+  <!-- iOS & Mobile Web App Meta -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="WordPower" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- Geometric Obsidian SVG Favicon Data-URI -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2f2f2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z'/%3E%3Cpath d='M8 7h8'/%3E%3Cpath d='M8 11h8'/%3E%3Cpath d='M8 15h5'/%3E%3C/svg%3E" />
+
+  <!-- Inline Web App Manifest Data-URI -->
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Word%20Power%20Made%20Easy%22%2C%22short_name%22%3A%22WordPower%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%2C%22orientation%22%3A%22any%22%7D" />
+
+  <!-- Mozilla PDF.js Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- Tailwind CSS Engine -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: {
+              black: '#000000',
+              base: '#090909',
+              card: '#121212',
+              hover: '#1a1a1a',
+              border: 'rgba(255, 255, 255, 0.08)',
+              borderFocus: 'rgba(255, 255, 255, 0.22)',
+              text: '#f2f2f2',
+              muted: '#888888',
+              dim: '#555555'
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"Inter"', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"SF Mono"', 'Menlo', 'Consolas', '"Courier New"', 'monospace']
+          },
+          borderRadius: {
+            reader: '6px'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
+      --sal: env(safe-area-inset-left, 0px);
+      --sar: env(safe-area-inset-right, 0px);
+    }
+    
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      width: 100%;
+      width: 100dvw;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background-color: #000000;
+      color: #f2f2f2;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      touch-action: pan-y pinch-zoom;
+    }
+
+    .header-safe {
+      padding-top: max(6px, var(--sat));
+      padding-left: max(10px, var(--sal));
+      padding-right: max(10px, var(--sar));
+    }
+    
+    .safe-bottom-pad {
+      padding-bottom: max(14px, var(--sab));
+    }
+
+    .drawer-transition {
+      transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease;
+    }
+
+    /* Native Smooth Scrolling Container */
+    #reader-scroll-viewport {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      overscroll-behavior-y: contain;
+    }
+
+    /* Minimalist Obsidian Scrollbars */
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #000000;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #242424;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3e3e3e;
+    }
+
+    /* =========================================================================
+       CRITICAL FIX: ISOLATED CANVAS INVERSION
+       Filters apply STRICTLY to the continuous canvas elements.
+       All header bars, bottom HUDs, drawers, and buttons remain pitch black!
+       ========================================================================= */
+    .filter-invert-active .pdf-page-canvas {
+      filter: invert(1) hue-rotate(180deg) contrast(0.96);
+      background-color: #ffffff !important;
+    }
+
+    .filter-grayscale-active .pdf-page-canvas {
+      filter: grayscale(1);
+    }
+
+    .filter-invert-active.filter-grayscale-active .pdf-page-canvas {
+      filter: invert(1) hue-rotate(180deg) grayscale(1) contrast(1.15);
+      background-color: #ffffff !important;
+    }
+
+    /* Responsive Page Canvas */
+    .pdf-page-canvas {
+      display: block;
+      width: 100% !important;
+      height: auto !important;
+      background-color: #ffffff;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+      transition: filter 180ms ease, opacity 120ms ease;
+    }
+
+    /* Page Slot Placeholder to prevent layout shifts */
+    .page-slot {
+      contain-intrinsic-size: 100% 600px;
+      content-visibility: auto;
+    }
+
+    /* Subtle active button indicator */
+    .pill-active {
+      background-color: #f2f2f2 !important;
+      color: #000000 !important;
+      font-weight: 600;
+    }
+
+    @keyframes monoSpin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner-ring {
+      animation: monoSpin 0.75s linear infinite;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body class="flex flex-col h-full w-full bg-obsidian-black font-sans antialiased text-obsidian-text overflow-hidden select-none">
+
+  <!-- TOP BAR (Guaranteed pitch-black Obsidian UI; never inverted) -->
+  <header class="header-safe flex-none h-13 bg-obsidian-base border-b border-obsidian-border flex items-center justify-between z-30 px-2 sm:px-3 relative">
+    
+    <!-- Left Region: TOC Trigger + Title -->
+    <div class="flex items-center space-x-2 min-w-0 pr-1">
+      <button 
+        id="btn-toc" 
+        onclick="toggleDrawer('left')" 
+        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors focus:outline-none flex-none" 
+        title="Table of Contents & Bookmarks (B / Esc)" 
+        aria-label="Table of Contents">
+        <svg class="w-4 h-4 text-obsidian-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="4" x2="20" y1="6" y2="6"></line>
+          <line x1="4" x2="20" y1="12" y2="12"></line>
+          <line x1="4" x2="20" y1="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <div class="flex flex-col min-w-0">
+        <div class="flex items-center space-x-1.5">
+          <h1 class="text-[13px] font-medium tracking-tight text-obsidian-text truncate max-w-[170px] sm:max-w-xs md:max-w-md">
+            Word Power Made Easy
+          </h1>
+          <span id="engine-badge" class="hidden xs:inline-block text-[8px] font-mono tracking-wider px-1.5 py-0.5 rounded-reader bg-emerald-950/40 border border-emerald-900/50 text-emerald-400">
+            SCROLL FEED
+          </span>
+        </div>
+        <p class="text-[10px] text-obsidian-muted truncate hidden sm:block">
+          Norman Lewis • Continuous Responsive Feed
+        </p>
+      </div>
+    </div>
+
+    <!-- Right Region: Compact Action Cluster -->
+    <div class="flex items-center space-x-1.5 sm:space-x-2 flex-none">
+      
+      <!-- Night Invert Toggle (Targets only PDF pages) -->
+      <button 
+        id="btn-invert" 
+        onclick="toggleInvert()" 
+        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
+        title="Night Invert (I) — Inverts Document Pages Only" 
+        aria-label="Toggle Invert">
+        <svg id="icon-invert" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+        </svg>
+      </button>
+
+      <!-- Grayscale E-Ink Toggle -->
+      <button 
+        id="btn-grayscale" 
+        onclick="toggleGrayscale()" 
+        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
+        title="Grayscale E-Ink Filter (G)" 
+        aria-label="Toggle Grayscale">
+        <svg id="icon-grayscale" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 2a10 10 0 0 1 0 20Z" fill="currentColor"></path>
+        </svg>
+      </button>
+
+      <!-- Fit Width Mode (Edge-to-Edge vs Padded Margins) -->
+      <button 
+        id="btn-width-mode" 
+        onclick="toggleWidthMode()" 
+        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
+        title="Toggle Flush Full-Width vs Padded Container (W)" 
+        aria-label="Toggle Width Mode">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <line x1="8" y1="4" x2="8" y2="20"></line>
+          <line x1="16" y1="4" x2="16" y2="20"></line>
+        </svg>
+      </button>
+
+      <!-- Fullscreen Toggle -->
+      <button 
+        id="btn-fullscreen" 
+        onclick="toggleFullscreen()" 
+        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
+        title="Toggle Fullscreen (F)" 
+        aria-label="Toggle Fullscreen">
+        <svg id="icon-fullscreen-enter" class="w-4 h-4 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
+          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
+          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
+          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+        </svg>
+        <svg id="icon-fullscreen-exit" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M4 14h6v6"></path>
+          <path d="M20 10h-6V4"></path>
+          <path d="M14 10l7-7"></path>
+          <path d="M3 21l7-7"></path>
+        </svg>
+      </button>
+
+      <div class="h-4 w-px bg-obsidian-border mx-0.5"></div>
+
+      <!-- Settings & Tools Trigger -->
+      <button 
+        id="btn-settings" 
+        onclick="toggleDrawer('right')" 
+        class="flex items-center justify-center w-8 h-8 md:w-auto md:px-2.5 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text space-x-1.5"
+        title="Settings & Tools" 
+        aria-label="Reader Settings">
+        <svg class="w-3.5 h-3.5 text-obsidian-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <line x1="21" x2="14" y1="4" y2="4"></line>
+          <line x1="10" x2="3" y1="4" y2="4"></line>
+          <line x1="21" x2="12" y1="12" y2="12"></line>
+          <line x1="8" x2="3" y1="12" y2="12"></line>
+          <line x1="21" x2="16" y1="20" y2="20"></line>
+          <line x1="12" x2="3" y1="20" y2="20"></line>
+          <line x1="14" x2="14" y1="2" y2="6"></line>
+          <line x1="8" x2="8" y1="10" y2="14"></line>
+          <line x1="16" x2="16" y1="18" y2="22"></line>
+        </svg>
+        <span class="text-[11px] font-medium hidden md:inline">Tools</span>
+      </button>
+
+    </div>
+  </header>
+
+  <!-- MAIN STAGE: NATIVE CONTINUOUS SCROLLING VIEWPORT -->
+  <main id="document-stage" class="relative flex-1 w-full h-full bg-obsidian-black overflow-hidden flex flex-col">
+    
+    <!-- Seamless Stage Loader -->
+    <div id="stage-loader" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-obsidian-black transition-opacity duration-300 pointer-events-none opacity-0">
+      <div class="w-8 h-8 rounded-full spinner-ring mb-3"></div>
+      <p id="loader-title" class="text-[11px] font-mono tracking-widest uppercase text-obsidian-muted">
+        Loading Document Feed
+      </p>
+      <p id="loader-sub" class="text-[10px] text-obsidian-dim mt-1">Preparing continuous scroll layout...</p>
+    </div>
+
+    <!-- Active Filter Status HUD -->
+    <div id="filter-hud" class="absolute top-3 right-3 z-20 pointer-events-none opacity-0 transition-opacity duration-200">
+      <span id="filter-hud-text" class="text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-reader bg-obsidian-base/90 border border-obsidian-border text-obsidian-muted backdrop-blur-sm shadow-sm">
+        ISOLATED NIGHT INVERT
+      </span>
+    </div>
+
+    <!-- CONTINUOUS SCROLL VIEWPORT -->
+    <div 
+      id="reader-scroll-viewport" 
+      class="relative w-full h-full overflow-y-auto overflow-x-hidden bg-obsidian-black">
+      
+      <!-- Responsive Document Wrapper: Changes dynamically based on width mode -->
+      <div 
+        id="pages-feed" 
+        class="w-full max-w-3xl mx-auto flex flex-col items-center gap-2 sm:gap-3 py-2 sm:py-4 px-0 sm:px-2 transition-[max-width] duration-150">
+        <!-- Dynamically injected page slots -->
+      </div>
+
+    </div>
+
+    <!-- NATIVE-STYLE FLOATING BOTTOM READING HUD -->
+    <div id="bottom-reading-hud" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-1.5 sm:space-x-2 px-2.5 sm:px-3 py-1.5 rounded-reader bg-obsidian-base/95 border border-obsidian-border backdrop-blur-md shadow-2xl transition-all duration-200">
+      
+      <!-- Previous Page Jump -->
+      <button 
+        onclick="scrollByPages(-1)" 
+        class="w-7 h-7 flex items-center justify-center rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-obsidian-text transition-colors" 
+        title="Scroll Up (ArrowLeft / PageUp)">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </button>
+
+      <!-- Live Page Tracker & Direct Jump Input -->
+      <div class="flex items-center space-x-1 px-1 font-mono text-[11px] text-obsidian-muted">
+        <span>p.</span>
+        <input 
+          id="hud-current-page" 
+          type="number" 
+          min="1" 
+          max="512" 
+          value="1" 
+          onchange="jumpToSlot(this.value)" 
+          class="w-11 bg-obsidian-card border border-obsidian-border rounded-reader px-1 py-0.5 text-center text-obsidian-text font-mono text-[11px] focus:outline-none focus:border-obsidian-borderFocus" />
+        <span class="text-obsidian-dim">/</span>
+        <span id="hud-total-pages" class="text-obsidian-text">512</span>
+      </div>
+
+      <!-- Next Page Jump -->
+      <button 
+        onclick="scrollByPages(1)" 
+        class="w-7 h-7 flex items-center justify-center rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-obsidian-text transition-colors" 
+        title="Scroll Down (ArrowRight / PageDown / Space)">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+
+      <div class="h-3.5 w-px bg-obsidian-border mx-0.5"></div>
+
+      <!-- Quick Scroll to Top -->
+      <button 
+        onclick="scrollToTop()" 
+        class="w-7 h-7 flex items-center justify-center rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-obsidian-muted hover:text-obsidian-text transition-colors" 
+        title="Scroll to Top">
+        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="19" x2="12" y2="5"></line>
+          <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+      </button>
+
+    </div>
+
+  </main>
+
+  <!-- DRAWER BACKDROP -->
+  <div 
+    id="drawer-backdrop" 
+    onclick="closeAllDrawers()" 
+    class="fixed inset-0 bg-black/70 backdrop-blur-[2px] z-40 opacity-0 pointer-events-none transition-opacity duration-200"
+    aria-hidden="true">
+  </div>
+
+  <!-- LEFT DRAWER: TABLE OF CONTENTS & BOOKMARKS -->
+  <aside 
+    id="drawer-left" 
+    class="fixed top-0 bottom-0 left-0 w-[85vw] sm:w-[380px] max-w-[420px] bg-obsidian-base border-r border-obsidian-border z-50 transform -translate-x-full drawer-transition flex flex-col header-safe safe-bottom-pad">
+    
+    <div class="flex items-center justify-between px-4 py-3 border-b border-obsidian-border">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4 text-obsidian-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+        </svg>
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-obsidian-text">
+          Table of Contents
+        </span>
+      </div>
+      <button 
+        onclick="closeAllDrawers()" 
+        class="w-7 h-7 rounded-reader flex items-center justify-center hover:bg-obsidian-card border border-transparent hover:border-obsidian-border text-obsidian-muted hover:text-obsidian-text transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Tabs Toggle -->
+    <div class="px-4 pt-3 pb-2 flex space-x-1.5 border-b border-obsidian-border">
+      <button 
+        id="tab-toc-btn" 
+        onclick="switchLeftTab('toc')" 
+        class="flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-obsidian-text border border-obsidian-border transition-colors">
+        Contents (TOC)
+      </button>
+      <button 
+        id="tab-bookmarks-btn" 
+        onclick="switchLeftTab('bookmarks')" 
+        class="flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-obsidian-text transition-colors border border-transparent">
+        Bookmarks (<span id="bookmark-count">0</span>)
+      </button>
+    </div>
+
+    <!-- Search TOC -->
+    <div id="toc-search-container" class="px-4 py-2.5 border-b border-obsidian-border">
+      <div class="relative">
+        <input 
+          id="toc-search-input" 
+          type="text" 
+          placeholder="Filter chapters or sessions..." 
+          oninput="handleTocFilter(this.value)"
+          class="w-full bg-obsidian-card border border-obsidian-border rounded-reader px-3 py-1.5 pl-8 text-[12px] text-obsidian-text placeholder-obsidian-dim focus:outline-none focus:border-obsidian-borderFocus transition-colors" />
+        <svg class="w-3.5 h-3.5 text-obsidian-dim absolute left-2.5 top-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+    </div>
+
+    <div id="pane-toc" class="flex-1 overflow-y-auto px-2 py-2 space-y-1"></div>
+
+    <div id="pane-bookmarks" class="flex-1 overflow-y-auto px-3 py-3 hidden flex-col space-y-3">
+      <div class="bg-obsidian-card p-3 rounded-reader border border-obsidian-border">
+        <label class="text-[11px] font-medium text-obsidian-muted block mb-1.5">Add Current Position</label>
+        <div class="flex space-x-2">
+          <input 
+            id="bm-page-input" 
+            type="number" 
+            min="1" 
+            max="600" 
+            placeholder="Page #" 
+            class="w-20 bg-obsidian-base border border-obsidian-border rounded-reader px-2 py-1 text-[12px] text-obsidian-text font-mono focus:outline-none focus:border-obsidian-borderFocus" />
+          <input 
+            id="bm-label-input" 
+            type="text" 
+            placeholder="Title (e.g. Session 14)" 
+            class="flex-1 bg-obsidian-base border border-obsidian-border rounded-reader px-2 py-1 text-[12px] text-obsidian-text focus:outline-none focus:border-obsidian-borderFocus" />
+        </div>
+        <button 
+          onclick="addBookmarkFromInput()" 
+          class="w-full mt-2 py-1.5 bg-white text-black hover:bg-neutral-200 text-[11px] font-semibold rounded-reader transition-colors">
+          + Save Bookmark
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto" id="bookmarks-list"></div>
+    </div>
+
+    <div class="p-3 border-t border-obsidian-border flex items-center justify-between text-[10px] text-obsidian-dim font-mono">
+      <span>WORD POWER MADE EASY</span>
+      <span id="drawer-total-pages">512 PAGES</span>
+    </div>
+  </aside>
+
+  <!-- RIGHT DRAWER: TOOLS, SCRATCHPAD & DISPLAY PRESETS -->
+  <aside 
+    id="drawer-right" 
+    class="fixed top-0 bottom-0 right-0 w-[85vw] sm:w-[380px] max-w-[420px] bg-obsidian-base border-l border-obsidian-border z-50 transform translate-x-full drawer-transition flex flex-col header-safe safe-bottom-pad">
+    
+    <div class="flex items-center justify-between px-4 py-3 border-b border-obsidian-border">
+      <div class="flex items-center space-x-2">
+        <svg class="w-4 h-4 text-obsidian-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+        <span class="text-[11px] font-semibold uppercase tracking-wider text-obsidian-text">
+          Display & Tools
+        </span>
+      </div>
+      <button 
+        onclick="closeAllDrawers()" 
+        class="w-7 h-7 rounded-reader flex items-center justify-center hover:bg-obsidian-card border border-transparent hover:border-obsidian-border text-obsidian-muted hover:text-obsidian-text transition-colors">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+      
+      <!-- Layout Mode Selector -->
+      <div>
+        <label class="text-[11px] font-mono uppercase text-obsidian-muted tracking-wider block mb-2">Feed Layout Width</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button 
+            id="opt-layout-flush" 
+            onclick="setWidthMode('flush')" 
+            class="p-2.5 text-left rounded-reader bg-obsidian-card border border-obsidian-border text-[11px] transition-colors">
+            <span class="font-medium text-obsidian-text block">Flush Screen</span>
+            <span class="text-[9px] text-obsidian-dim">100% width, zero margins</span>
+          </button>
+          <button 
+            id="opt-layout-comfort" 
+            onclick="setWidthMode('comfort')" 
+            class="p-2.5 text-left rounded-reader bg-obsidian-card border border-obsidian-borderFocus text-[11px] transition-colors">
+            <span class="font-medium text-obsidian-text block">Comfort Reading</span>
+            <span class="text-[9px] text-obsidian-dim">Balanced centered column</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Local File Upload (Zero CORS, 100% Instant Continuous Rendering) -->
+      <div>
+        <label class="text-[11px] font-mono uppercase text-obsidian-muted tracking-wider block mb-1.5">Load Local PDF Document</label>
+        <label class="w-full flex items-center justify-center p-3 rounded-reader border border-dashed border-obsidian-border hover:border-obsidian-borderFocus bg-obsidian-card cursor-pointer transition-colors text-center">
+          <div class="space-y-1">
+            <svg class="w-5 h-5 mx-auto text-obsidian-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span class="text-[11px] font-medium text-obsidian-text block">Choose local .pdf file</span>
+            <span class="text-[9px] text-obsidian-dim block">Instant offline reading with isolated night invert</span>
+          </div>
+          <input type="file" accept="application/pdf" class="hidden" onchange="handleLocalPdfUpload(event)" />
+        </label>
+      </div>
+
+      <!-- Study Scratchpad -->
+      <div class="pt-2 border-t border-obsidian-border">
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="text-[11px] font-mono uppercase text-obsidian-muted tracking-wider">Vocabulary Scratchpad</label>
+          <span id="notes-status" class="text-[9px] font-mono text-obsidian-dim">Synced locally</span>
+        </div>
+        <textarea 
+          id="reader-notes" 
+          rows="5" 
+          placeholder="Record Latin/Greek roots, etymologies, or session notes here..."
+          oninput="handleNotesInput(this.value)"
+          class="w-full bg-obsidian-card border border-obsidian-border rounded-reader p-2.5 text-[12px] text-obsidian-text placeholder-obsidian-dim font-mono focus:outline-none focus:border-obsidian-borderFocus leading-relaxed resize-none"></textarea>
+        
+        <div class="flex items-center space-x-2 mt-2">
+          <button 
+            onclick="copyNotesToClipboard()" 
+            class="flex-1 py-1.5 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-[11px] font-medium text-obsidian-text transition-colors flex items-center justify-center space-x-1">
+            <span id="copy-btn-text">Copy Notes</span>
+          </button>
+          <button 
+            onclick="confirmClearNotes()" 
+            class="px-2.5 py-1.5 rounded-reader bg-obsidian-card hover:bg-red-950/30 border border-obsidian-border hover:border-red-900/50 text-[11px] text-obsidian-muted hover:text-red-400 transition-colors">
+            Clear
+          </button>
+        </div>
+      </div>
+
+      <!-- Remote Document URL Input -->
+      <div class="pt-2 border-t border-obsidian-border">
+        <label class="text-[11px] font-mono uppercase text-obsidian-muted tracking-wider block mb-1.5">Remote PDF Source</label>
+        <div class="flex space-x-1.5">
+          <input 
+            id="custom-source-url" 
+            type="url" 
+            value="https://cdn.toprankers.net.in/docs/1615811485lewis-norman-word-power-made-easy-knopf-doubleday-p-027eca6f7eaa0.pdf" 
+            class="flex-1 bg-obsidian-card border border-obsidian-border rounded-reader px-2 py-1 text-[11px] text-obsidian-muted focus:text-obsidian-text focus:outline-none focus:border-obsidian-borderFocus font-mono truncate" />
+          <button 
+            onclick="updateCustomUrl()" 
+            class="px-2.5 py-1 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-[11px] font-medium text-obsidian-text transition-colors">
+            Load
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Keyboard Shortcuts Legend -->
+    <div class="p-3 border-t border-obsidian-border bg-obsidian-card/40 text-[10px] text-obsidian-muted flex justify-between font-mono">
+      <span>[W] Width</span>
+      <span>[I] Invert</span>
+      <span>[G] Gray</span>
+      <span>[F] Fullscreen</span>
+    </div>
+  </aside>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container" class="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center space-y-2"></div>
+
+  <!-- CONFIRMATION MODAL -->
+  <div id="custom-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-150">
+    <div class="bg-obsidian-base border border-obsidian-border rounded-reader max-w-sm w-full p-4 space-y-3 shadow-2xl">
+      <h3 id="modal-title" class="text-[13px] font-semibold text-obsidian-text tracking-tight">Confirm Action</h3>
+      <p id="modal-message" class="text-[12px] text-obsidian-muted leading-relaxed">Are you sure you want to proceed?</p>
+      <div class="flex items-center justify-end space-x-2 pt-2">
+        <button id="modal-cancel-btn" class="px-3 py-1.5 rounded-reader text-[11px] font-medium text-obsidian-muted hover:text-obsidian-text bg-obsidian-card border border-obsidian-border transition-colors">
+          Cancel
+        </button>
+        <button id="modal-confirm-btn" class="px-3 py-1.5 rounded-reader text-[11px] font-semibold text-black bg-white hover:bg-neutral-200 transition-colors">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const BOOK_METADATA = {
+      title: "Word Power Made Easy",
+      author: "Norman Lewis",
+      pages: 512,
+      defaultCdn: "https://cdn.toprankers.net.in/docs/1615811485lewis-norman-word-power-made-easy-knopf-doubleday-p-027eca6f7eaa0.pdf"
+    };
+
+    const TOC_SECTIONS = [
+      {
+        part: "Front Matter",
+        items: [
+          { title: "How to Use This Book for Maximum Benefit", page: 3, subtitle: "Getting the habit of vocabulary mastery" },
+          { title: "First Diagnostic Test: Discovering Your Level", page: 9, subtitle: "Assessing current word power" }
+        ]
+      },
+      {
+        part: "Part 1: Getting Off to a Good Start",
+        items: [
+          { title: "Session 1–3: How to Talk About Personality Types", page: 21, subtitle: "Egoist, altruist, introvert, misanthrope" },
+          { title: "Session 4–6: How to Talk About Doctors", page: 55, subtitle: "Internist, gynecologist, dermatologist, etc." },
+          { title: "Session 7–10: How to Talk About Various Practitioners", page: 89, subtitle: "Psychologists, orthodontists, graphologists" },
+          { title: "Part One Review & Comprehensive Check-up", page: 121, subtitle: "Reinforcement & Mastery tests" }
+        ]
+      },
+      {
+        part: "Part 2: Gaining Increased Momentum",
+        items: [
+          { title: "Session 11–13: How to Talk About Science & Scientists", page: 135, subtitle: "Anthropologist, astronomer, entomologist" },
+          { title: "Session 14–17: How to Talk About Liars & Lying", page: 177, subtitle: "Notorious, incorrigible, inveterate, egregious" },
+          { title: "Session 18–23: How to Talk About Actions", page: 215, subtitle: "Disparage, equivocate, titillate, obviate" },
+          { title: "Session 24–27: How to Talk About Speech Habits", page: 261, subtitle: "Taciturn, loquacious, voluble, reticent" },
+          { title: "Part Two Review & Milestone Check-up", page: 295, subtitle: "Checking speed and retention" }
+        ]
+      },
+      {
+        part: "Part 3: Finishing with a Higher Feeling of Power",
+        items: [
+          { title: "Session 28–31: How to Talk About Personal Characteristics", page: 309, subtitle: "Condone, placate, vacillate, nostalgic" },
+          { title: "Session 32–37: How to Flatter Your Friends", page: 347, subtitle: "Complaisant, adulatory, punctilious" },
+          { title: "Session 38–41: How to Insult Your Enemies", page: 389, subtitle: "Vicarious, baneful, prurient, martinet" },
+          { title: "Session 42–46: Talk About Word Meanings & Etymologies", page: 427, subtitle: "Latin and Greek roots in action" }
+        ]
+      },
+      {
+        part: "Appendices & References",
+        items: [
+          { title: "Comprehensive Final Diagnostic Test", page: 473, subtitle: "Measuring your newly acquired vocabulary" },
+          { title: "Index of Latin, Greek Roots & Affixes", page: 501, subtitle: "Complete etymological directory" }
+        ]
+      }
+    ];
+
+    // Local Storage Wrapper
+    const storage = {
+      get: (key, fallback) => {
+        try {
+          const val = localStorage.getItem(`wpme_v2_${key}`);
+          return val !== null ? JSON.parse(val) : fallback;
+        } catch (e) {
+          return fallback;
+        }
+      },
+      set: (key, value) => {
+        try {
+          localStorage.setItem(`wpme_v2_${key}`, JSON.stringify(value));
+        } catch (e) {}
+      }
+    };
+
+    if (window.pdfjsLib) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    const state = {
+      pdfUrl: storage.get('pdfUrl', BOOK_METADATA.defaultCdn),
+      filter: {
+        invert: storage.get('filter_invert', false),
+        grayscale: storage.get('filter_grayscale', false)
+      },
+      widthMode: storage.get('widthMode', 'comfort'), // 'flush' | 'comfort'
+      currentPage: storage.get('currentPage', 1),
+      totalPages: BOOK_METADATA.pages,
+      bookmarks: storage.get('bookmarks', [
+        { id: 'bm_1', page: 21, label: 'Session 1: Personality Types', timestamp: 'Initial' },
+        { id: 'bm_2', page: 135, label: 'Session 11: Scientists', timestamp: 'Initial' },
+        { id: 'bm_3', page: 427, label: 'Roots Directory', timestamp: 'Initial' }
+      ]),
+      notes: storage.get('notes', ''),
+      pdfDoc: null,
+      aspectRatio: 1.414,
+      renderedPages: new Set(),
+      activeRenderTasks: new Map()
+    };
+
+    const scrollViewport = document.getElementById('reader-scroll-viewport');
+    const pagesFeed = document.getElementById('pages-feed');
+    const stageLoader = document.getElementById('stage-loader');
+    const filterHud = document.getElementById('filter-hud');
+    const filterHudText = document.getElementById('filter-hud-text');
+
+    let intersectionObserver = null;
+
+    async function loadPdfDocument(source) {
+      showLoader(true, 'Opening Document Feed', 'Fetching pages...');
+      try {
+        const loadingTask = pdfjsLib.getDocument(source);
+        state.pdfDoc = await loadingTask.promise;
+        state.totalPages = state.pdfDoc.numPages;
+
+        document.getElementById('hud-total-pages').textContent = state.totalPages;
+        document.getElementById('drawer-total-pages').textContent = `${state.totalPages} PAGES`;
+        document.getElementById('hud-current-page').max = state.totalPages;
+
+        // Obtain initial aspect ratio from Page 1
+        const firstPage = await state.pdfDoc.getPage(1);
+        const vp = firstPage.getViewport({ scale: 1 });
+        state.aspectRatio = vp.height / vp.width;
+
+        buildContinuousPageSlots();
+        setupIntersectionObserver();
+        showToast(`Document Ready: ${state.totalPages} Pages`);
+
+        // Restore saved page position
+        if (state.currentPage > 1) {
+          setTimeout(() => jumpToSlot(state.currentPage, false), 100);
+        }
+      } catch (err) {
+        console.warn('Direct PDF load error:', err);
+        // Fallback demo document generator if remote CDN blocks cross-origin requests
+        handleDocumentLoadError(err);
+      } finally {
+        showLoader(false);
+      }
+    }
+
+    function buildContinuousPageSlots() {
+      pagesFeed.innerHTML = '';
+      state.renderedPages.clear();
+
+      const fragment = document.createDocumentFragment();
+
+      for (let i = 1; i <= state.totalPages; i++) {
+        const slot = document.createElement('div');
+        slot.id = `page-slot-${i}`;
+        slot.className = 'page-slot relative w-full flex flex-col items-center justify-center my-1 sm:my-2 rounded-sm overflow-hidden bg-obsidian-card/40 border border-obsidian-border/50';
+        slot.dataset.page = i;
+        
+        // Dynamic placeholder height to preserve total vertical scroll geometry
+        slot.style.minHeight = '480px';
+
+        // Skeleton loading indicator
+        slot.innerHTML = `
+          <div class="slot-skeleton flex flex-col items-center justify-center text-obsidian-dim font-mono text-[11px] py-20 pointer-events-none">
+            <div class="w-5 h-5 rounded-full spinner-ring mb-2 opacity-50"></div>
+            <span>Page ${i}</span>
+          </div>
+          <canvas id="page-canvas-${i}" class="pdf-page-canvas rounded-sm hidden"></canvas>
+        `;
+
+        fragment.appendChild(slot);
+      }
+
+      pagesFeed.appendChild(fragment);
+    }
+
+    function setupIntersectionObserver() {
+      if (intersectionObserver) intersectionObserver.disconnect();
+
+      intersectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const pageNum = parseInt(entry.target.dataset.page, 10);
+          if (entry.isIntersecting) {
+            renderSlotCanvas(pageNum);
+          } else {
+            // Memory optimization for 500+ pages on mobile
+            recycleFarCanvas(pageNum);
+          }
+        });
+      }, {
+        root: scrollViewport,
+        rootMargin: '600px 0px 600px 0px',
+        threshold: 0.01
+      });
+
+      document.querySelectorAll('.page-slot').forEach(el => intersectionObserver.observe(el));
+    }
+
+    async function renderSlotCanvas(pageNum) {
+      if (!state.pdfDoc || state.renderedPages.has(pageNum)) return;
+
+      const slot = document.getElementById(`page-slot-${pageNum}`);
+      const canvas = document.getElementById(`page-canvas-${pageNum}`);
+      if (!slot || !canvas) return;
+
+      state.renderedPages.add(pageNum);
+
+      try {
+        const page = await state.pdfDoc.getPage(pageNum);
+        const containerWidth = slot.clientWidth || pagesFeed.clientWidth || window.innerWidth;
+        const unscaledViewport = page.getViewport({ scale: 1 });
+        
+        // Exact 100% fluid responsive width scaling
+        const fitScale = containerWidth / unscaledViewport.width;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for mobile battery/RAM efficiency
+        const viewport = page.getViewport({ scale: fitScale * dpr });
+
+        canvas.width = Math.floor(viewport.width);
+        canvas.height = Math.floor(viewport.height);
+
+        const ctx = canvas.getContext('2d', { alpha: false });
+        
+        // Cancel existing task if any
+        if (state.activeRenderTasks.has(pageNum)) {
+          state.activeRenderTasks.get(pageNum).cancel();
+        }
+
+        const renderTask = page.render({
+          canvasContext: ctx,
+          viewport: viewport
+        });
+
+        state.activeRenderTasks.set(pageNum, renderTask);
+
+        await renderTask.promise;
+        state.activeRenderTasks.delete(pageNum);
+
+        // Swap skeleton with crisp rendered canvas
+        const skeleton = slot.querySelector('.slot-skeleton');
+        if (skeleton) skeleton.classList.add('hidden');
+        canvas.classList.remove('hidden');
+        slot.style.minHeight = 'auto';
+
+      } catch (err) {
+        if (err.name !== 'RenderingCancelledException') {
+          console.error(`Page ${pageNum} render error:`, err);
+        }
+      }
+    }
+
+    function recycleFarCanvas(pageNum) {
+      // Recycle canvases located far away from current viewport to preserve iOS RAM limits
+      if (Math.abs(pageNum - state.currentPage) > 10 && state.renderedPages.has(pageNum)) {
+        const slot = document.getElementById(`page-slot-${pageNum}`);
+        const canvas = document.getElementById(`page-canvas-${pageNum}`);
+        if (canvas) {
+          canvas.width = 1;
+          canvas.height = 1;
+          canvas.classList.add('hidden');
+        }
+        const skeleton = slot ? slot.querySelector('.slot-skeleton') : null;
+        if (skeleton) skeleton.classList.remove('hidden');
+        state.renderedPages.delete(pageNum);
+      }
+    }
+
+    let scrollDebounceTimer = null;
+    scrollViewport.addEventListener('scroll', () => {
+      if (scrollDebounceTimer) return;
+      scrollDebounceTimer = setTimeout(() => {
+        detectActiveVisiblePage();
+        scrollDebounceTimer = null;
+      }, 80);
+    }, { passive: true });
+
+    function detectActiveVisiblePage() {
+      const slots = document.querySelectorAll('.page-slot');
+      const viewportTop = scrollViewport.scrollTop;
+      const viewportMiddle = viewportTop + (scrollViewport.clientHeight / 3);
+
+      for (let i = 0; i < slots.length; i++) {
+        const slot = slots[i];
+        const top = slot.offsetTop;
+        const bottom = top + slot.offsetHeight;
+
+        if (top <= viewportMiddle && bottom >= viewportMiddle) {
+          const page = parseInt(slot.dataset.page, 10);
+          if (page !== state.currentPage) {
+            state.currentPage = page;
+            document.getElementById('hud-current-page').value = page;
+            storage.set('currentPage', page);
+          }
+          break;
+        }
+      }
+    }
+
+    function scrollByPages(delta) {
+      const target = Math.max(1, Math.min(state.totalPages, state.currentPage + delta));
+      jumpToSlot(target);
+    }
+
+    function jumpToSlot(pageNum, smooth = true) {
+      const num = parseInt(pageNum, 10);
+      if (isNaN(num) || num < 1 || num > state.totalPages) return;
+      
+      const targetSlot = document.getElementById(`page-slot-${num}`);
+      if (targetSlot) {
+        targetSlot.scrollIntoView({
+          behavior: smooth ? 'smooth' : 'auto',
+          block: 'start'
+        });
+        state.currentPage = num;
+        document.getElementById('hud-current-page').value = num;
+        storage.set('currentPage', num);
+        closeAllDrawers();
+      }
+    }
+
+    function scrollToTop() {
+      scrollViewport.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function applyDocumentFilters() {
+      const body = document.body;
+
+      if (state.filter.invert) {
+        body.classList.add('filter-invert-active');
+        document.getElementById('btn-invert').classList.add('pill-active');
+      } else {
+        body.classList.remove('filter-invert-active');
+        document.getElementById('btn-invert').classList.remove('pill-active');
+      }
+
+      if (state.filter.grayscale) {
+        body.classList.add('filter-grayscale-active');
+        document.getElementById('btn-grayscale').classList.add('pill-active');
+      } else {
+        body.classList.remove('filter-grayscale-active');
+        document.getElementById('btn-grayscale').classList.remove('pill-active');
+      }
+
+      let hudText = 'FILTER: NONE';
+      if (state.filter.invert && state.filter.grayscale) hudText = 'FILTER: OBSIDIAN E-INK (PAGES ONLY)';
+      else if (state.filter.invert) hudText = 'FILTER: NIGHT INVERT (PAGES ONLY)';
+      else if (state.filter.grayscale) hudText = 'FILTER: GRAYSCALE';
+
+      filterHudText.textContent = hudText;
+      filterHud.classList.remove('opacity-0');
+      clearTimeout(window._hudTimer);
+      window._hudTimer = setTimeout(() => filterHud.classList.add('opacity-0'), 1500);
+
+      storage.set('filter_invert', state.filter.invert);
+      storage.set('filter_grayscale', state.filter.grayscale);
+    }
+
+    function toggleInvert() {
+      state.filter.invert = !state.filter.invert;
+      applyDocumentFilters();
+      showToast(state.filter.invert ? 'Night Invert Enabled (Pages Only)' : 'Night Invert Disabled');
+    }
+
+    function toggleGrayscale() {
+      state.filter.grayscale = !state.filter.grayscale;
+      applyDocumentFilters();
+      showToast(state.filter.grayscale ? 'Grayscale Filter Enabled' : 'Grayscale Disabled');
+    }
+
+    function toggleWidthMode() {
+      setWidthMode(state.widthMode === 'flush' ? 'comfort' : 'flush');
+    }
+
+    function setWidthMode(mode) {
+      state.widthMode = mode;
+      storage.set('widthMode', mode);
+
+      const btnFlush = document.getElementById('opt-layout-flush');
+      const btnComfort = document.getElementById('opt-layout-comfort');
+
+      if (mode === 'flush') {
+        pagesFeed.className = 'w-full mx-auto flex flex-col items-center gap-0 py-0 px-0 transition-[max-width] duration-150';
+        btnFlush.classList.add('border-obsidian-borderFocus');
+        btnComfort.classList.remove('border-obsidian-borderFocus');
+        showToast('Flush Full-Width Mode');
+      } else {
+        pagesFeed.className = 'w-full max-w-3xl mx-auto flex flex-col items-center gap-2 sm:gap-3 py-2 sm:py-4 px-0 sm:px-2 transition-[max-width] duration-150';
+        btnComfort.classList.add('border-obsidian-borderFocus');
+        btnFlush.classList.remove('border-obsidian-borderFocus');
+        showToast('Comfort Reading Margins');
+      }
+
+      // Re-render visible pages at new width
+      clearTimeout(window._resizeRerender);
+      window._resizeRerender = setTimeout(() => {
+        state.renderedPages.clear();
+        detectActiveVisiblePage();
+        renderSlotCanvas(state.currentPage);
+      }, 150);
+    }
+
+    function renderTableOfContents(filterTerm = '') {
+      const container = document.getElementById('pane-toc');
+      container.innerHTML = '';
+      const query = filterTerm.trim().toLowerCase();
+
+      TOC_SECTIONS.forEach((section) => {
+        const matching = section.items.filter(item => 
+          item.title.toLowerCase().includes(query) || 
+          item.subtitle.toLowerCase().includes(query)
+        );
+
+        if (matching.length === 0) return;
+
+        const heading = document.createElement('div');
+        heading.className = 'pt-3 pb-1 px-2 text-[10px] font-mono uppercase tracking-wider text-obsidian-muted font-semibold';
+        heading.textContent = section.part;
+        container.appendChild(heading);
+
+        matching.forEach(item => {
+          const itemBtn = document.createElement('button');
+          itemBtn.className = 'w-full text-left px-2.5 py-2 rounded-reader hover:bg-obsidian-card border border-transparent hover:border-obsidian-border transition-colors group flex items-start justify-between space-x-2';
+          itemBtn.onclick = () => jumpToSlot(item.page);
+
+          itemBtn.innerHTML = `
+            <div class="min-w-0 flex-1">
+              <p class="text-[12px] font-medium text-obsidian-text group-hover:text-white truncate">${escapeHtml(item.title)}</p>
+              <p class="text-[10px] text-obsidian-dim truncate mt-0.5">${escapeHtml(item.subtitle)}</p>
+            </div>
+            <span class="text-[10px] font-mono text-obsidian-muted px-1.5 py-0.5 rounded bg-obsidian-card border border-obsidian-border flex-none">
+              p. ${item.page}
+            </span>
+          `;
+          container.appendChild(itemBtn);
+        });
+      });
+    }
+
+    function handleTocFilter(val) {
+      renderTableOfContents(val);
+    }
+
+    function renderBookmarks() {
+      const list = document.getElementById('bookmarks-list');
+      const badge = document.getElementById('bookmark-count');
+      list.innerHTML = '';
+      badge.textContent = state.bookmarks.length;
+
+      if (state.bookmarks.length === 0) {
+        list.innerHTML = `<div class="py-8 text-center text-obsidian-dim text-[11px]">No bookmarks saved yet.</div>`;
+        return;
+      }
+
+      state.bookmarks.forEach(bm => {
+        const item = document.createElement('div');
+        item.className = 'p-2.5 bg-obsidian-card rounded-reader border border-obsidian-border mb-2 flex items-center justify-between space-x-2';
+        item.innerHTML = `
+          <div class="min-w-0 flex-1 cursor-pointer" onclick="jumpToSlot(${bm.page})">
+            <p class="text-[12px] font-medium text-obsidian-text truncate">${escapeHtml(bm.label)}</p>
+            <p class="text-[10px] font-mono text-obsidian-muted">Page ${bm.page} • ${bm.timestamp}</p>
+          </div>
+          <button 
+            onclick="removeBookmark('${bm.id}')" 
+            class="w-6 h-6 flex items-center justify-center text-obsidian-dim hover:text-red-400 transition-colors">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        `;
+        list.appendChild(item);
+      });
+    }
+
+    function addBookmarkFromInput() {
+      const pageInput = document.getElementById('bm-page-input');
+      const labelInput = document.getElementById('bm-label-input');
+      const page = parseInt(pageInput.value, 10) || state.currentPage;
+      const label = labelInput.value.trim() || `Session Note (Page ${page})`;
+
+      const newBm = {
+        id: 'bm_' + Date.now(),
+        page: page,
+        label: label,
+        timestamp: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      };
+
+      state.bookmarks.unshift(newBm);
+      storage.set('bookmarks', state.bookmarks);
+      renderBookmarks();
+      pageInput.value = '';
+      labelInput.value = '';
+      showToast(`Bookmark saved: Page ${page}`);
+    }
+
+    function removeBookmark(id) {
+      state.bookmarks = state.bookmarks.filter(b => b.id !== id);
+      storage.set('bookmarks', state.bookmarks);
+      renderBookmarks();
+      showToast('Bookmark removed');
+    }
+
+    function switchLeftTab(tab) {
+      const tocBtn = document.getElementById('tab-toc-btn');
+      const bmBtn = document.getElementById('tab-bookmarks-btn');
+      const searchBox = document.getElementById('toc-search-container');
+      const paneToc = document.getElementById('pane-toc');
+      const paneBm = document.getElementById('pane-bookmarks');
+
+      if (tab === 'toc') {
+        tocBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-obsidian-text border border-obsidian-border transition-colors';
+        bmBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-obsidian-text transition-colors border border-transparent';
+        searchBox.classList.remove('hidden');
+        paneToc.classList.remove('hidden');
+        paneBm.classList.add('hidden');
+      } else {
+        bmBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-obsidian-text border border-obsidian-border transition-colors';
+        tocBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-obsidian-text transition-colors border border-transparent';
+        searchBox.classList.add('hidden');
+        paneToc.classList.add('hidden');
+        paneBm.classList.remove('hidden');
+        renderBookmarks();
+      }
+    }
+
+    function handleNotesInput(text) {
+      state.notes = text;
+      storage.set('notes', text);
+      const status = document.getElementById('notes-status');
+      status.textContent = 'Saving...';
+      clearTimeout(window._noteTimer);
+      window._noteTimer = setTimeout(() => { status.textContent = 'Synced locally'; }, 500);
+    }
+
+    function copyNotesToClipboard() {
+      const text = state.notes;
+      if (!text || text.trim() === '') {
+        showToast('Scratchpad is empty');
+        return;
+      }
+      try {
+        const dummy = document.createElement('textarea');
+        dummy.value = text;
+        dummy.style.position = 'fixed';
+        dummy.style.opacity = '0';
+        document.body.appendChild(dummy);
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+
+        const btnText = document.getElementById('copy-btn-text');
+        btnText.textContent = 'Copied!';
+        setTimeout(() => btnText.textContent = 'Copy Notes', 1600);
+        showToast('Notes copied to clipboard');
+      } catch (err) {
+        showToast('Unable to copy');
+      }
+    }
+
+    function confirmClearNotes() {
+      showCustomModal(
+        'Clear Scratchpad?',
+        'Erase all notes currently in your study scratchpad? This action cannot be undone.',
+        () => {
+          state.notes = '';
+          storage.set('notes', '');
+          document.getElementById('reader-notes').value = '';
+          showToast('Scratchpad cleared');
+        }
+      );
+    }
+
+    function handleLocalPdfUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      showLoader(true, 'Opening Local File', file.name);
+      const reader = new FileReader();
+
+      reader.onload = function() {
+        const typedArray = new Uint8Array(this.result);
+        loadPdfDocument(typedArray);
+        showToast(`Loaded: ${file.name}`);
+        closeAllDrawers();
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function updateCustomUrl() {
+      const val = document.getElementById('custom-source-url').value.trim();
+      if (!val) return showToast('Please enter a valid URL');
+      state.pdfUrl = val;
+      storage.set('pdfUrl', val);
+      loadPdfDocument(val);
+      closeAllDrawers();
+    }
+
+    function handleDocumentLoadError(err) {
+      showToast('CORS restricted on CDN. Using CORS-safe gateway...');
+      // Transparent proxy fallback for browsers enforcing strict cross-origin blocks
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(state.pdfUrl)}`;
+      loadPdfDocument(proxyUrl).catch(() => {
+        showToast('Please choose local PDF or check URL');
+      });
+    }
+
+    function showLoader(visible, title = '', sub = '') {
+      if (visible) {
+        stageLoader.classList.remove('opacity-0', 'pointer-events-none');
+        if (title) document.getElementById('loader-title').textContent = title;
+        if (sub) document.getElementById('loader-sub').textContent = sub;
+      } else {
+        stageLoader.classList.add('opacity-0', 'pointer-events-none');
+      }
+    }
+
+    let activeDrawer = null;
+    function toggleDrawer(side) {
+      if (activeDrawer === side) closeAllDrawers();
+      else openDrawer(side);
+    }
+
+    function openDrawer(side) {
+      closeAllDrawers();
+      activeDrawer = side;
+      const drawer = document.getElementById(`drawer-${side}`);
+      const backdrop = document.getElementById('drawer-backdrop');
+      backdrop.classList.remove('pointer-events-none', 'opacity-0');
+      backdrop.classList.add('opacity-100');
+      drawer.classList.remove('-translate-x-full', 'translate-x-full');
+      drawer.classList.add('translate-x-0');
+    }
+
+    function closeAllDrawers() {
+      activeDrawer = null;
+      const left = document.getElementById('drawer-left');
+      const right = document.getElementById('drawer-right');
+      const backdrop = document.getElementById('drawer-backdrop');
+      backdrop.classList.remove('opacity-100');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      left.classList.remove('translate-x-0');
+      left.classList.add('-translate-x-full');
+      right.classList.remove('translate-x-0');
+      right.classList.add('translate-x-full');
+    }
+
+    function toggleFullscreen() {
+      const doc = document.documentElement;
+      const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement;
+      if (!isFullscreen) {
+        if (doc.requestFullscreen) doc.requestFullscreen().catch(() => showToast('Fullscreen blocked by browser'));
+        else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const isFs = Boolean(document.fullscreenElement);
+      document.getElementById('icon-fullscreen-enter').classList.toggle('hidden', isFs);
+      document.getElementById('icon-fullscreen-exit').classList.toggle('hidden', !isFs);
+    });
+
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'px-3 py-1.5 rounded-reader bg-obsidian-card/95 border border-obsidian-border text-[11px] font-medium text-obsidian-text shadow-xl backdrop-blur-md transition-all duration-200 opacity-0 translate-y-2';
+      toast.textContent = message;
+      container.appendChild(toast);
+      requestAnimationFrame(() => toast.classList.remove('opacity-0', 'translate-y-2'));
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 250);
+      }, 2400);
+    }
+
+    function showCustomModal(title, message, onConfirm) {
+      const modal = document.getElementById('custom-modal');
+      const titleEl = document.getElementById('modal-title');
+      const msgEl = document.getElementById('modal-message');
+      const confirmBtn = document.getElementById('modal-confirm-btn');
+      const cancelBtn = document.getElementById('modal-cancel-btn');
+
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+
+      const handleConfirm = () => {
+        hideModal();
+        if (onConfirm) onConfirm();
+      };
+
+      const hideModal = () => {
+        modal.classList.add('opacity-0');
+        setTimeout(() => modal.classList.add('hidden'), 150);
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', hideModal);
+      };
+
+      confirmBtn.addEventListener('click', handleConfirm);
+      cancelBtn.addEventListener('click', hideModal);
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => modal.classList.remove('opacity-0'));
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const tag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+        if (e.key === 'Escape') document.activeElement.blur();
+        return;
+      }
+
+      if (e.key === 'Escape') closeAllDrawers();
+      else if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); scrollByPages(1); }
+      else if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); scrollByPages(-1); }
+      else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
+      else if (e.key === 'g' || e.key === 'G') { e.preventDefault(); toggleGrayscale(); }
+      else if (e.key === 'i' || e.key === 'I') { e.preventDefault(); toggleInvert(); }
+      else if (e.key === 'w' || e.key === 'W') { e.preventDefault(); toggleWidthMode(); }
+      else if (e.key === 'b' || e.key === 'B') { e.preventDefault(); toggleDrawer('left'); }
+    });
+
+    // Auto-recalculate canvas resolution on window resize or mobile orientation switch
+    window.addEventListener('resize', () => {
+      clearTimeout(window._viewportResizeTimer);
+      window._viewportResizeTimer = setTimeout(() => {
+        state.renderedPages.clear();
+        detectActiveVisiblePage();
+        renderSlotCanvas(state.currentPage);
+      }, 200);
+    });
+
+    function escapeHtml(str) {
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const notesEl = document.getElementById('reader-notes');
+      if (notesEl && state.notes) notesEl.value = state.notes;
+
+      setWidthMode(state.widthMode);
+      renderTableOfContents();
+      renderBookmarks();
+      applyDocumentFilters();
+
+      loadPdfDocument(state.pdfUrl);
+    });
+  </script>
+</body>
+</html>
