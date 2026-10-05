@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Word Power Made Easy — Norman Lewis</title>
-  
-  <!-- Open Graph & Standalone Web App Meta -->
-  <meta name="description" content="Minimalist, responsive continuous-scrolling digital reader for Norman Lewis's Word Power Made Easy with isolated e-ink and night invert filters." />
+  <title>Word Power Made Easy — Reader & Community</title>
+
+  <!-- Open Graph & GitHub Pages Meta -->
+  <meta name="description" content="Word Power Made Easy by Norman Lewis — High-performance continuous-scrolling mobile reader crafted by Kavy-Codes / krush91." />
   <meta property="og:title" content="Word Power Made Easy — Digital Reader" />
-  <meta property="og:description" content="Continuous vertical scroll reader with edge-to-edge mobile fitting, bookmarks, and isolated night inversion." />
+  <meta property="og:description" content="Obsidian dark mode continuous scroll reader with isolated night inversion and vocabulary community." />
   <meta property="og:type" content="book" />
-  <meta name="author" content="Norman Lewis" />
+  <meta name="author" content="Norman Lewis, Kavy-Codes / krush91" />
 
   <!-- iOS & Mobile Web App Meta -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -20,11 +20,8 @@
   <meta name="theme-color" content="#000000" />
   <meta name="color-scheme" content="dark" />
 
-  <!-- Geometric Obsidian SVG Favicon Data-URI -->
+  <!-- Vector SVG Favicon Data-URI -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2f2f2' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z'/%3E%3Cpath d='M8 7h8'/%3E%3Cpath d='M8 11h8'/%3E%3Cpath d='M8 15h5'/%3E%3C/svg%3E" />
-
-  <!-- Inline Web App Manifest Data-URI -->
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Word%20Power%20Made%20Easy%22%2C%22short_name%22%3A%22WordPower%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23000000%22%2C%22theme_color%22%3A%22%23000000%22%2C%22orientation%22%3A%22any%22%7D" />
 
   <!-- Mozilla PDF.js Engine -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -39,26 +36,31 @@
           colors: {
             obsidian: {
               black: '#000000',
-              base: '#090909',
-              card: '#121212',
-              hover: '#1a1a1a',
+              base: '#080808',
+              card: '#111111',
+              hover: '#1c1c1c',
               border: 'rgba(255, 255, 255, 0.08)',
-              borderFocus: 'rgba(255, 255, 255, 0.22)',
+              borderFocus: 'rgba(255, 255, 255, 0.25)',
               text: '#f2f2f2',
               muted: '#888888',
               dim: '#555555'
+            },
+            discord: {
+              brand: '#5865F2',
+              hover: '#4752c4',
+              glow: 'rgba(88, 101, 242, 0.45)'
             }
           },
           fontFamily: {
             sans: ['-apple-system', 'BlinkMacSystemFont', '"Inter"', '"Segoe UI"', 'Roboto', 'sans-serif'],
-            mono: ['"SF Mono"', 'Menlo', 'Consolas', '"Courier New"', 'monospace']
+            mono: ['"SF Mono"', '"JetBrains Mono"', 'Menlo', 'Consolas', 'monospace']
           },
           borderRadius: {
-            reader: '6px'
+            reader: '7px'
           }
         }
       }
-    }
+    };
   </script>
 
   <style>
@@ -67,21 +69,29 @@
       --sab: env(safe-area-inset-bottom, 0px);
       --sal: env(safe-area-inset-left, 0px);
       --sar: env(safe-area-inset-right, 0px);
+      --dock-height: calc(58px + var(--sab));
+      --top-nav-height: calc(48px + var(--sat));
     }
-    
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+    }
+
     html, body {
       height: 100%;
       height: 100dvh;
       width: 100%;
       width: 100dvw;
-      margin: 0;
-      padding: 0;
       overflow: hidden;
       background-color: #000000;
       color: #f2f2f2;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
-      touch-action: pan-y pinch-zoom;
+      user-select: none;
     }
 
     .header-safe {
@@ -89,46 +99,21 @@
       padding-left: max(10px, var(--sal));
       padding-right: max(10px, var(--sar));
     }
-    
-    .safe-bottom-pad {
-      padding-bottom: max(14px, var(--sab));
-    }
 
     .drawer-transition {
-      transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1), opacity 220ms ease;
+      transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1), opacity 240ms ease;
     }
 
-    /* Native Smooth Scrolling Container */
     #reader-scroll-viewport {
       -webkit-overflow-scrolling: touch;
       scroll-behavior: smooth;
       overscroll-behavior-y: contain;
     }
 
-    /* Minimalist Obsidian Scrollbars */
-    ::-webkit-scrollbar {
-      width: 4px;
-      height: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #000000;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #242424;
-      border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #3e3e3e;
-    }
-
-    /* =========================================================================
-       CRITICAL FIX: ISOLATED CANVAS INVERSION
-       Filters apply STRICTLY to the continuous canvas elements.
-       All header bars, bottom HUDs, drawers, and buttons remain pitch black!
-       ========================================================================= */
+    /* Isolated Document Filters (Target only the PDF canvas, never UI bars) */
     .filter-invert-active .pdf-page-canvas {
-      filter: invert(1) hue-rotate(180deg) contrast(0.96);
-      background-color: #ffffff !important;
+      filter: invert(0.92) hue-rotate(180deg) contrast(1.1);
+      background-color: #000000 !important;
     }
 
     .filter-grayscale-active .pdf-page-canvas {
@@ -136,31 +121,28 @@
     }
 
     .filter-invert-active.filter-grayscale-active .pdf-page-canvas {
-      filter: invert(1) hue-rotate(180deg) grayscale(1) contrast(1.15);
-      background-color: #ffffff !important;
+      filter: invert(0.92) hue-rotate(180deg) grayscale(1) contrast(1.15);
+      background-color: #000000 !important;
     }
 
-    /* Responsive Page Canvas */
     .pdf-page-canvas {
       display: block;
       width: 100% !important;
       height: auto !important;
       background-color: #ffffff;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-      transition: filter 180ms ease, opacity 120ms ease;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+      transition: filter 160ms ease, opacity 120ms ease;
     }
 
-    /* Page Slot Placeholder to prevent layout shifts */
     .page-slot {
-      contain-intrinsic-size: 100% 600px;
+      contain-intrinsic-size: 100% 640px;
       content-visibility: auto;
     }
 
-    /* Subtle active button indicator */
     .pill-active {
-      background-color: #f2f2f2 !important;
-      color: #000000 !important;
-      font-weight: 600;
+      background-color: #242424 !important;
+      color: #ffffff !important;
+      border-color: rgba(255, 255, 255, 0.3) !important;
     }
 
     @keyframes monoSpin {
@@ -168,58 +150,129 @@
     }
     .spinner-ring {
       animation: monoSpin 0.75s linear infinite;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-top-color: #f2f2f2;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-top-color: #ffffff;
+    }
+
+    /* HIGH-IMPACT THUMB-FRIENDLY DISCORD BUTTON */
+    .bottom-discord-dock {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: var(--dock-height);
+      padding: 6px 12px calc(6px + var(--sab)) 12px;
+      background-color: rgba(5, 5, 7, 0.96);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(88, 101, 242, 0.28);
+      z-index: 40;
+      flex-shrink: 0;
+      width: 100%;
+      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.8);
+    }
+
+    .btn-discord-hero {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 520px;
+      height: 48px;
+      padding: 0 16px;
+      background: linear-gradient(135deg, #5865F2 0%, #4752c4 100%);
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(88, 101, 242, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      overflow: hidden;
+      transition: all 160ms cubic-bezier(0.16, 1, 0.3, 1);
+      touch-action: manipulation;
+    }
+
+    .btn-discord-hero::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -60%;
+      width: 40%;
+      height: 200%;
+      background: linear-gradient(
+        60deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.25) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(25deg);
+      animation: sheen 3.2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes sheen {
+      0%, 65% { transform: translateX(0) rotate(25deg); }
+      100% { transform: translateX(500%) rotate(25deg); }
+    }
+
+    .btn-discord-hero:active {
+      transform: scale(0.98);
+      box-shadow: 0 2px 10px rgba(88, 101, 242, 0.6);
+    }
+
+    .live-dot-glow {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: #57F287;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #57F287;
+      flex-shrink: 0;
     }
   </style>
 </head>
 
 <body class="flex flex-col h-full w-full bg-obsidian-black font-sans antialiased text-obsidian-text overflow-hidden select-none">
 
-  <!-- TOP BAR (Guaranteed pitch-black Obsidian UI; never inverted) -->
-  <header class="header-safe flex-none h-13 bg-obsidian-base border-b border-obsidian-border flex items-center justify-between z-30 px-2 sm:px-3 relative">
+  <!-- TOP APP BAR -->
+  <header class="header-safe flex-none h-[48px] bg-obsidian-base border-b border-obsidian-border flex items-center justify-between z-30 px-3 relative">
     
-    <!-- Left Region: TOC Trigger + Title -->
-    <div class="flex items-center space-x-2 min-w-0 pr-1">
+    <!-- Left Region: TOC Trigger + Title & Creator Pill -->
+    <div class="flex items-center space-x-2.5 min-w-0 pr-1 flex-1">
       <button 
         id="btn-toc" 
         onclick="toggleDrawer('left')" 
-        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors focus:outline-none flex-none" 
-        title="Table of Contents & Bookmarks (B / Esc)" 
+        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors flex-none" 
+        title="Table of Contents & Bookmarks (B)" 
         aria-label="Table of Contents">
-        <svg class="w-4 h-4 text-obsidian-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="w-4 h-4 text-obsidian-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <line x1="4" x2="20" y1="6" y2="6"></line>
           <line x1="4" x2="20" y1="12" y2="12"></line>
           <line x1="4" x2="20" y1="18" y2="18"></line>
         </svg>
       </button>
 
-      <div class="flex flex-col min-w-0">
-        <div class="flex items-center space-x-1.5">
-          <h1 class="text-[13px] font-medium tracking-tight text-obsidian-text truncate max-w-[170px] sm:max-w-xs md:max-w-md">
-            Word Power Made Easy
-          </h1>
-          <span id="engine-badge" class="hidden xs:inline-block text-[8px] font-mono tracking-wider px-1.5 py-0.5 rounded-reader bg-emerald-950/40 border border-emerald-900/50 text-emerald-400">
-            SCROLL FEED
-          </span>
-        </div>
-        <p class="text-[10px] text-obsidian-muted truncate hidden sm:block">
-          Norman Lewis • Continuous Responsive Feed
+      <div class="flex flex-col min-w-0 leading-tight">
+        <h1 class="text-[13px] font-semibold tracking-tight text-white truncate">
+          Word Power Made Easy
+        </h1>
+        <p class="text-[10px] font-mono text-obsidian-muted truncate">
+          Norman Lewis • by <strong class="text-white font-semibold">Kavy-Codes / krush91</strong>
         </p>
       </div>
     </div>
 
-    <!-- Right Region: Compact Action Cluster -->
-    <div class="flex items-center space-x-1.5 sm:space-x-2 flex-none">
+    <!-- Right Region: Compact Tools (OLED Invert, Grayscale, Fullscreen, Settings) -->
+    <div class="flex items-center space-x-1.5 flex-none">
       
       <!-- Night Invert Toggle (Targets only PDF pages) -->
       <button 
         id="btn-invert" 
         onclick="toggleInvert()" 
         class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
-        title="Night Invert (I) — Inverts Document Pages Only" 
+        title="OLED Night Invert (I)" 
         aria-label="Toggle Invert">
-        <svg id="icon-invert" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
         </svg>
       </button>
@@ -231,23 +284,9 @@
         class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
         title="Grayscale E-Ink Filter (G)" 
         aria-label="Toggle Grayscale">
-        <svg id="icon-grayscale" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"></circle>
           <path d="M12 2a10 10 0 0 1 0 20Z" fill="currentColor"></path>
-        </svg>
-      </button>
-
-      <!-- Fit Width Mode (Edge-to-Edge vs Padded Margins) -->
-      <button 
-        id="btn-width-mode" 
-        onclick="toggleWidthMode()" 
-        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
-        title="Toggle Flush Full-Width vs Padded Container (W)" 
-        aria-label="Toggle Width Mode">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
-          <line x1="8" y1="4" x2="8" y2="20"></line>
-          <line x1="16" y1="4" x2="16" y2="20"></line>
         </svg>
       </button>
 
@@ -258,41 +297,25 @@
         class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
         title="Toggle Fullscreen (F)" 
         aria-label="Toggle Fullscreen">
-        <svg id="icon-fullscreen-enter" class="w-4 h-4 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M8 3H5a2 2 0 0 0-2 2v3"></path>
-          <path d="M21 8V5a2 2 0 0 0-2-2h-3"></path>
-          <path d="M3 16v3a2 2 0 0 0 2 2h3"></path>
-          <path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>
+        <svg id="icon-fullscreen-enter" class="w-4 h-4 block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
         </svg>
-        <svg id="icon-fullscreen-exit" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M4 14h6v6"></path>
-          <path d="M20 10h-6V4"></path>
-          <path d="M14 10l7-7"></path>
-          <path d="M3 21l7-7"></path>
+        <svg id="icon-fullscreen-exit" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"></path>
         </svg>
       </button>
 
-      <div class="h-4 w-px bg-obsidian-border mx-0.5"></div>
-
-      <!-- Settings & Tools Trigger -->
+      <!-- Settings & Community Drawer -->
       <button 
         id="btn-settings" 
         onclick="toggleDrawer('right')" 
-        class="flex items-center justify-center w-8 h-8 md:w-auto md:px-2.5 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text space-x-1.5"
-        title="Settings & Tools" 
-        aria-label="Reader Settings">
-        <svg class="w-3.5 h-3.5 text-obsidian-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <line x1="21" x2="14" y1="4" y2="4"></line>
-          <line x1="10" x2="3" y1="4" y2="4"></line>
-          <line x1="21" x2="12" y1="12" y2="12"></line>
-          <line x1="8" x2="3" y1="12" y2="12"></line>
-          <line x1="21" x2="16" y1="20" y2="20"></line>
-          <line x1="12" x2="3" y1="20" y2="20"></line>
-          <line x1="14" x2="14" y1="2" y2="6"></line>
-          <line x1="8" x2="8" y1="10" y2="14"></line>
-          <line x1="16" x2="16" y1="18" y2="22"></line>
+        class="flex items-center justify-center w-8 h-8 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border transition-colors text-obsidian-text"
+        title="Settings & Community" 
+        aria-label="Settings">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
-        <span class="text-[11px] font-medium hidden md:inline">Tools</span>
       </button>
 
     </div>
@@ -322,133 +345,116 @@
       id="reader-scroll-viewport" 
       class="relative w-full h-full overflow-y-auto overflow-x-hidden bg-obsidian-black">
       
-      <!-- Responsive Document Wrapper: Changes dynamically based on width mode -->
+      <!-- Responsive Document Wrapper -->
       <div 
         id="pages-feed" 
         class="w-full max-w-3xl mx-auto flex flex-col items-center gap-2 sm:gap-3 py-2 sm:py-4 px-0 sm:px-2 transition-[max-width] duration-150">
         <!-- Dynamically injected page slots -->
       </div>
-
     </div>
+  </main>
 
-    <!-- NATIVE-STYLE FLOATING BOTTOM READING HUD -->
-    <div id="bottom-reading-hud" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-1.5 sm:space-x-2 px-2.5 sm:px-3 py-1.5 rounded-reader bg-obsidian-base/95 border border-obsidian-border backdrop-blur-md shadow-2xl transition-all duration-200">
-      
-      <!-- Previous Page Jump -->
-      <button 
-        onclick="scrollByPages(-1)" 
-        class="w-7 h-7 flex items-center justify-center rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-obsidian-text transition-colors" 
-        title="Scroll Up (ArrowLeft / PageUp)">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="18 15 12 9 6 15"></polyline>
+  <!-- PROMINENT BOTTOM DISCORD HERO DOCK -->
+  <nav class="bottom-discord-dock">
+    <a href="https://discord.com/invite/jEWhUtJNE" target="_blank" rel="noopener noreferrer" class="btn-discord-hero" title="Join Official Discord Server">
+      <div class="flex items-center gap-3 min-w-0">
+        <!-- Official Discord Logo Icon -->
+        <svg class="w-7 h-7 flex-shrink-0 text-white drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
         </svg>
-      </button>
 
-      <!-- Live Page Tracker & Direct Jump Input -->
-      <div class="flex items-center space-x-1 px-1 font-mono text-[11px] text-obsidian-muted">
-        <span>p.</span>
-        <input 
-          id="hud-current-page" 
-          type="number" 
-          min="1" 
-          max="512" 
-          value="1" 
-          onchange="jumpToSlot(this.value)" 
-          class="w-11 bg-obsidian-card border border-obsidian-border rounded-reader px-1 py-0.5 text-center text-obsidian-text font-mono text-[11px] focus:outline-none focus:border-obsidian-borderFocus" />
-        <span class="text-obsidian-dim">/</span>
-        <span id="hud-total-pages" class="text-obsidian-text">512</span>
+        <div class="flex flex-col text-left leading-tight min-w-0">
+          <span class="text-[13px] font-extrabold uppercase tracking-wide text-white whitespace-nowrap">
+            Join Official Discord
+          </span>
+          <span class="text-[10px] text-indigo-100 flex items-center gap-1.5 whitespace-nowrap overflow-hidden text-ellipsis">
+            <span class="live-dot-glow"></span> Study Community • Kavy-Codes / krush91
+          </span>
+        </div>
       </div>
 
-      <!-- Next Page Jump -->
-      <button 
-        onclick="scrollByPages(1)" 
-        class="w-7 h-7 flex items-center justify-center rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-obsidian-text transition-colors" 
-        title="Scroll Down (ArrowRight / PageDown / Space)">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
-      </button>
-
-      <div class="h-3.5 w-px bg-obsidian-border mx-0.5"></div>
-
-      <!-- Quick Scroll to Top -->
-      <button 
-        onclick="scrollToTop()" 
-        class="w-7 h-7 flex items-center justify-center rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-obsidian-muted hover:text-obsidian-text transition-colors" 
-        title="Scroll to Top">
-        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="19" x2="12" y2="5"></line>
-          <polyline points="5 12 12 5 19 12"></polyline>
-        </svg>
-      </button>
-
-    </div>
-
-  </main>
+      <!-- Arrow Chevron -->
+      <svg class="w-5 h-5 text-white/90 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+  </nav>
 
   <!-- DRAWER BACKDROP -->
   <div 
     id="drawer-backdrop" 
     onclick="closeAllDrawers()" 
-    class="fixed inset-0 bg-black/70 backdrop-blur-[2px] z-40 opacity-0 pointer-events-none transition-opacity duration-200"
+    class="fixed inset-0 bg-black/75 backdrop-blur-[2px] z-40 opacity-0 pointer-events-none transition-opacity duration-200"
     aria-hidden="true">
   </div>
 
   <!-- LEFT DRAWER: TABLE OF CONTENTS & BOOKMARKS -->
   <aside 
     id="drawer-left" 
-    class="fixed top-0 bottom-0 left-0 w-[85vw] sm:w-[380px] max-w-[420px] bg-obsidian-base border-r border-obsidian-border z-50 transform -translate-x-full drawer-transition flex flex-col header-safe safe-bottom-pad">
+    class="fixed top-0 bottom-0 left-0 w-[86vw] sm:w-[380px] max-w-[420px] bg-obsidian-base border-r border-obsidian-border z-50 transform -translate-x-full drawer-transition flex flex-col header-safe"
+    style="padding-bottom: max(14px, var(--sab));">
     
     <div class="flex items-center justify-between px-4 py-3 border-b border-obsidian-border">
       <div class="flex items-center space-x-2">
-        <svg class="w-4 h-4 text-obsidian-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <svg class="w-4 h-4 text-obsidian-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
           <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
         </svg>
         <span class="text-[11px] font-semibold uppercase tracking-wider text-obsidian-text">
-          Table of Contents
+          Index & Navigation
         </span>
       </div>
       <button 
         onclick="closeAllDrawers()" 
-        class="w-7 h-7 rounded-reader flex items-center justify-center hover:bg-obsidian-card border border-transparent hover:border-obsidian-border text-obsidian-muted hover:text-obsidian-text transition-colors">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        class="w-7 h-7 rounded-reader flex items-center justify-center hover:bg-obsidian-card border border-transparent hover:border-obsidian-border text-obsidian-muted hover:text-white transition-colors">
+        ✕
       </button>
     </div>
 
+    <!-- Quick Page Jump Input -->
+    <div class="px-4 py-3 border-b border-obsidian-border">
+      <label class="text-[10px] font-mono uppercase text-obsidian-muted tracking-wider block mb-1.5">Direct Page Jump</label>
+      <div class="flex space-x-2">
+        <input 
+          id="direct-page-input" 
+          type="number" 
+          min="1" 
+          max="512" 
+          placeholder="Page (1-512)" 
+          class="flex-1 bg-obsidian-card border border-obsidian-border rounded-reader px-3 py-1.5 text-[12px] text-obsidian-text font-mono focus:border-obsidian-borderFocus" />
+        <button 
+          onclick="handleDirectJump()" 
+          class="px-4 py-1.5 bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-[12px] font-semibold text-white rounded-reader transition-colors">
+          Go
+        </button>
+      </div>
+    </div>
+
     <!-- Tabs Toggle -->
-    <div class="px-4 pt-3 pb-2 flex space-x-1.5 border-b border-obsidian-border">
+    <div class="px-4 pt-2.5 pb-2 flex space-x-1.5 border-b border-obsidian-border">
       <button 
         id="tab-toc-btn" 
         onclick="switchLeftTab('toc')" 
-        class="flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-obsidian-text border border-obsidian-border transition-colors">
-        Contents (TOC)
+        class="flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-white border border-obsidian-border transition-colors">
+        Sessions (TOC)
       </button>
       <button 
         id="tab-bookmarks-btn" 
         onclick="switchLeftTab('bookmarks')" 
-        class="flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-obsidian-text transition-colors border border-transparent">
+        class="flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-white transition-colors border border-transparent">
         Bookmarks (<span id="bookmark-count">0</span>)
       </button>
     </div>
 
-    <!-- Search TOC -->
-    <div id="toc-search-container" class="px-4 py-2.5 border-b border-obsidian-border">
-      <div class="relative">
-        <input 
-          id="toc-search-input" 
-          type="text" 
-          placeholder="Filter chapters or sessions..." 
-          oninput="handleTocFilter(this.value)"
-          class="w-full bg-obsidian-card border border-obsidian-border rounded-reader px-3 py-1.5 pl-8 text-[12px] text-obsidian-text placeholder-obsidian-dim focus:outline-none focus:border-obsidian-borderFocus transition-colors" />
-        <svg class="w-3.5 h-3.5 text-obsidian-dim absolute left-2.5 top-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-      </div>
+    <!-- Filter TOC -->
+    <div id="toc-search-container" class="px-4 py-2 border-b border-obsidian-border">
+      <input 
+        id="toc-search-input" 
+        type="text" 
+        placeholder="Filter chapters or sessions..." 
+        oninput="handleTocFilter(this.value)"
+        class="w-full bg-obsidian-card border border-obsidian-border rounded-reader px-3 py-1.5 text-[11px] text-obsidian-text placeholder-obsidian-dim focus:border-obsidian-borderFocus transition-colors" />
     </div>
 
     <div id="pane-toc" class="flex-1 overflow-y-auto px-2 py-2 space-y-1"></div>
@@ -463,12 +469,12 @@
             min="1" 
             max="600" 
             placeholder="Page #" 
-            class="w-20 bg-obsidian-base border border-obsidian-border rounded-reader px-2 py-1 text-[12px] text-obsidian-text font-mono focus:outline-none focus:border-obsidian-borderFocus" />
+            class="w-20 bg-obsidian-base border border-obsidian-border rounded-reader px-2 py-1 text-[12px] text-obsidian-text font-mono focus:border-obsidian-borderFocus" />
           <input 
             id="bm-label-input" 
             type="text" 
-            placeholder="Title (e.g. Session 14)" 
-            class="flex-1 bg-obsidian-base border border-obsidian-border rounded-reader px-2 py-1 text-[12px] text-obsidian-text focus:outline-none focus:border-obsidian-borderFocus" />
+            placeholder="Session label" 
+            class="flex-1 bg-obsidian-base border border-obsidian-border rounded-reader px-2 py-1 text-[12px] text-obsidian-text focus:border-obsidian-borderFocus" />
         </div>
         <button 
           onclick="addBookmarkFromInput()" 
@@ -481,39 +487,67 @@
     </div>
 
     <div class="p-3 border-t border-obsidian-border flex items-center justify-between text-[10px] text-obsidian-dim font-mono">
-      <span>WORD POWER MADE EASY</span>
+      <span>NORMAN LEWIS</span>
       <span id="drawer-total-pages">512 PAGES</span>
     </div>
   </aside>
 
-  <!-- RIGHT DRAWER: TOOLS, SCRATCHPAD & DISPLAY PRESETS -->
+  <!-- RIGHT DRAWER: SETTINGS, COMMUNITY & VOCAB SCRATCHPAD -->
   <aside 
     id="drawer-right" 
-    class="fixed top-0 bottom-0 right-0 w-[85vw] sm:w-[380px] max-w-[420px] bg-obsidian-base border-l border-obsidian-border z-50 transform translate-x-full drawer-transition flex flex-col header-safe safe-bottom-pad">
+    class="fixed top-0 bottom-0 right-0 w-[86vw] sm:w-[380px] max-w-[420px] bg-obsidian-base border-l border-obsidian-border z-50 transform translate-x-full drawer-transition flex flex-col header-safe"
+    style="padding-bottom: max(14px, var(--sab));">
     
     <div class="flex items-center justify-between px-4 py-3 border-b border-obsidian-border">
       <div class="flex items-center space-x-2">
-        <svg class="w-4 h-4 text-obsidian-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <svg class="w-4 h-4 text-obsidian-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
         <span class="text-[11px] font-semibold uppercase tracking-wider text-obsidian-text">
-          Display & Tools
+          Community & Settings
         </span>
       </div>
       <button 
         onclick="closeAllDrawers()" 
-        class="w-7 h-7 rounded-reader flex items-center justify-center hover:bg-obsidian-card border border-transparent hover:border-obsidian-border text-obsidian-muted hover:text-obsidian-text transition-colors">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        class="w-7 h-7 rounded-reader flex items-center justify-center hover:bg-obsidian-card border border-transparent hover:border-obsidian-border text-obsidian-muted hover:text-white transition-colors">
+        ✕
       </button>
     </div>
 
     <div class="flex-1 overflow-y-auto px-4 py-4 space-y-5">
       
-      <!-- Layout Mode Selector -->
+      <!-- PROMINENT DISCORD COMMUNITY CARD -->
+      <div class="relative overflow-hidden rounded-xl border border-indigo-500/30 bg-gradient-to-br from-[#121324] to-[#0c0d18] p-4 shadow-xl">
+        <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-[10px] font-mono font-medium text-indigo-300 w-fit mb-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+          OFFICIAL COMMUNITY
+        </div>
+        <h3 class="text-[15px] font-bold text-white tracking-tight">Join Kavy's Study Hub</h3>
+        <p class="text-[11px] text-slate-300 leading-relaxed mt-1 mb-3">
+          Daily vocabulary flashcards, root-word quizzes, SSC & competitive exam circles, and direct updates.
+        </p>
+
+        <!-- Big CTA Button -->
+        <a 
+          href="https://discord.com/invite/jEWhUtJNE" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[13px] rounded-lg shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98]">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+          JOIN OFFICIAL SERVER
+        </a>
+
+        <!-- Attribution Info -->
+        <div class="mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between text-[10px] text-slate-400">
+          <span>Curated by <strong class="text-white">Kavy-Codes / krush91</strong></span>
+          <span class="font-mono bg-white/5 px-2 py-0.5 rounded border border-white/10 text-slate-300">ID: 930434072449257502</span>
+        </div>
+      </div>
+
+      <!-- Layout Width Toggle -->
       <div>
         <label class="text-[11px] font-mono uppercase text-obsidian-muted tracking-wider block mb-2">Feed Layout Width</label>
         <div class="grid grid-cols-2 gap-2">
@@ -534,9 +568,9 @@
         </div>
       </div>
 
-      <!-- Local File Upload (Zero CORS, 100% Instant Continuous Rendering) -->
+      <!-- Local File Upload -->
       <div>
-        <label class="text-[11px] font-mono uppercase text-obsidian-muted tracking-wider block mb-1.5">Load Local PDF Document</label>
+        <label class="text-[11px] font-mono uppercase text-obsidian-muted tracking-wider block mb-1.5">Load Alternate PDF File</label>
         <label class="w-full flex items-center justify-center p-3 rounded-reader border border-dashed border-obsidian-border hover:border-obsidian-borderFocus bg-obsidian-card cursor-pointer transition-colors text-center">
           <div class="space-y-1">
             <svg class="w-5 h-5 mx-auto text-obsidian-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -545,7 +579,7 @@
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
             <span class="text-[11px] font-medium text-obsidian-text block">Choose local .pdf file</span>
-            <span class="text-[9px] text-obsidian-dim block">Instant offline reading with isolated night invert</span>
+            <span class="text-[9px] text-obsidian-dim block">Instant offline reading</span>
           </div>
           <input type="file" accept="application/pdf" class="hidden" onchange="handleLocalPdfUpload(event)" />
         </label>
@@ -559,55 +593,36 @@
         </div>
         <textarea 
           id="reader-notes" 
-          rows="5" 
-          placeholder="Record Latin/Greek roots, etymologies, or session notes here..."
+          rows="4" 
+          placeholder="Record roots, etymologies, or chapter notes here..."
           oninput="handleNotesInput(this.value)"
-          class="w-full bg-obsidian-card border border-obsidian-border rounded-reader p-2.5 text-[12px] text-obsidian-text placeholder-obsidian-dim font-mono focus:outline-none focus:border-obsidian-borderFocus leading-relaxed resize-none"></textarea>
+          class="w-full bg-obsidian-card border border-obsidian-border rounded-reader p-2.5 text-[12px] text-obsidian-text placeholder-obsidian-dim font-mono focus:border-obsidian-borderFocus leading-relaxed resize-none"></textarea>
         
         <div class="flex items-center space-x-2 mt-2">
           <button 
             onclick="copyNotesToClipboard()" 
-            class="flex-1 py-1.5 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-[11px] font-medium text-obsidian-text transition-colors flex items-center justify-center space-x-1">
+            class="flex-1 py-1.5 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-[11px] font-medium text-obsidian-text transition-colors">
             <span id="copy-btn-text">Copy Notes</span>
           </button>
           <button 
             onclick="confirmClearNotes()" 
-            class="px-2.5 py-1.5 rounded-reader bg-obsidian-card hover:bg-red-950/30 border border-obsidian-border hover:border-red-900/50 text-[11px] text-obsidian-muted hover:text-red-400 transition-colors">
+            class="px-3 py-1.5 rounded-reader bg-obsidian-card hover:bg-red-950/30 border border-obsidian-border hover:border-red-900/50 text-[11px] text-obsidian-muted hover:text-red-400 transition-colors">
             Clear
           </button>
         </div>
       </div>
 
-      <!-- Remote Document URL Input -->
-      <div class="pt-2 border-t border-obsidian-border">
-        <label class="text-[11px] font-mono uppercase text-obsidian-muted tracking-wider block mb-1.5">Remote PDF Source</label>
-        <div class="flex space-x-1.5">
-          <input 
-            id="custom-source-url" 
-            type="url" 
-            value="https://cdn.toprankers.net.in/docs/1615811485lewis-norman-word-power-made-easy-knopf-doubleday-p-027eca6f7eaa0.pdf" 
-            class="flex-1 bg-obsidian-card border border-obsidian-border rounded-reader px-2 py-1 text-[11px] text-obsidian-muted focus:text-obsidian-text focus:outline-none focus:border-obsidian-borderFocus font-mono truncate" />
-          <button 
-            onclick="updateCustomUrl()" 
-            class="px-2.5 py-1 rounded-reader bg-obsidian-card hover:bg-obsidian-hover border border-obsidian-border text-[11px] font-medium text-obsidian-text transition-colors">
-            Load
-          </button>
-        </div>
-      </div>
-
     </div>
 
-    <!-- Keyboard Shortcuts Legend -->
+    <!-- Attribution Footer -->
     <div class="p-3 border-t border-obsidian-border bg-obsidian-card/40 text-[10px] text-obsidian-muted flex justify-between font-mono">
-      <span>[W] Width</span>
-      <span>[I] Invert</span>
-      <span>[G] Gray</span>
-      <span>[F] Fullscreen</span>
+      <span>KAVY-CODES</span>
+      <span>DISCORD: 930434072449257502</span>
     </div>
   </aside>
 
   <!-- TOAST CONTAINER -->
-  <div id="toast-container" class="fixed bottom-16 sm:bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center space-y-2"></div>
+  <div id="toast-container" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center space-y-2"></div>
 
   <!-- CONFIRMATION MODAL -->
   <div id="custom-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-150">
@@ -629,6 +644,7 @@
     const BOOK_METADATA = {
       title: "Word Power Made Easy",
       author: "Norman Lewis",
+      curator: "Kavy-Codes / krush91",
       pages: 512,
       defaultCdn: "https://cdn.toprankers.net.in/docs/1615811485lewis-norman-word-power-made-easy-knopf-doubleday-p-027eca6f7eaa0.pdf"
     };
@@ -682,7 +698,7 @@
     const storage = {
       get: (key, fallback) => {
         try {
-          const val = localStorage.getItem(`wpme_v2_${key}`);
+          const val = localStorage.getItem(`wpme_kavy_${key}`);
           return val !== null ? JSON.parse(val) : fallback;
         } catch (e) {
           return fallback;
@@ -690,7 +706,7 @@
       },
       set: (key, value) => {
         try {
-          localStorage.setItem(`wpme_v2_${key}`, JSON.stringify(value));
+          localStorage.setItem(`wpme_kavy_${key}`, JSON.stringify(value));
         } catch (e) {}
       }
     };
@@ -705,17 +721,16 @@
         invert: storage.get('filter_invert', false),
         grayscale: storage.get('filter_grayscale', false)
       },
-      widthMode: storage.get('widthMode', 'comfort'), // 'flush' | 'comfort'
+      widthMode: storage.get('widthMode', 'comfort'),
       currentPage: storage.get('currentPage', 1),
       totalPages: BOOK_METADATA.pages,
       bookmarks: storage.get('bookmarks', [
-        { id: 'bm_1', page: 21, label: 'Session 1: Personality Types', timestamp: 'Initial' },
-        { id: 'bm_2', page: 135, label: 'Session 11: Scientists', timestamp: 'Initial' },
-        { id: 'bm_3', page: 427, label: 'Roots Directory', timestamp: 'Initial' }
+        { id: 'bm_1', page: 21, label: 'Session 1: Personality Types', timestamp: 'Mark' },
+        { id: 'bm_2', page: 135, label: 'Session 11: Scientists', timestamp: 'Mark' },
+        { id: 'bm_3', page: 427, label: 'Roots Directory', timestamp: 'Mark' }
       ]),
       notes: storage.get('notes', ''),
       pdfDoc: null,
-      aspectRatio: 1.414,
       renderedPages: new Set(),
       activeRenderTasks: new Map()
     };
@@ -729,32 +744,25 @@
     let intersectionObserver = null;
 
     async function loadPdfDocument(source) {
-      showLoader(true, 'Opening Document Feed', 'Fetching pages...');
+      showLoader(true, 'Opening Word Power Feed', 'Rendering pages...');
       try {
         const loadingTask = pdfjsLib.getDocument(source);
         state.pdfDoc = await loadingTask.promise;
         state.totalPages = state.pdfDoc.numPages;
 
-        document.getElementById('hud-total-pages').textContent = state.totalPages;
         document.getElementById('drawer-total-pages').textContent = `${state.totalPages} PAGES`;
-        document.getElementById('hud-current-page').max = state.totalPages;
-
-        // Obtain initial aspect ratio from Page 1
-        const firstPage = await state.pdfDoc.getPage(1);
-        const vp = firstPage.getViewport({ scale: 1 });
-        state.aspectRatio = vp.height / vp.width;
+        const directInput = document.getElementById('direct-page-input');
+        if (directInput) directInput.max = state.totalPages;
 
         buildContinuousPageSlots();
         setupIntersectionObserver();
         showToast(`Document Ready: ${state.totalPages} Pages`);
 
-        // Restore saved page position
         if (state.currentPage > 1) {
-          setTimeout(() => jumpToSlot(state.currentPage, false), 100);
+          setTimeout(() => jumpToSlot(state.currentPage, false), 120);
         }
       } catch (err) {
-        console.warn('Direct PDF load error:', err);
-        // Fallback demo document generator if remote CDN blocks cross-origin requests
+        console.warn('PDF load warning:', err);
         handleDocumentLoadError(err);
       } finally {
         showLoader(false);
@@ -772,11 +780,8 @@
         slot.id = `page-slot-${i}`;
         slot.className = 'page-slot relative w-full flex flex-col items-center justify-center my-1 sm:my-2 rounded-sm overflow-hidden bg-obsidian-card/40 border border-obsidian-border/50';
         slot.dataset.page = i;
-        
-        // Dynamic placeholder height to preserve total vertical scroll geometry
         slot.style.minHeight = '480px';
 
-        // Skeleton loading indicator
         slot.innerHTML = `
           <div class="slot-skeleton flex flex-col items-center justify-center text-obsidian-dim font-mono text-[11px] py-20 pointer-events-none">
             <div class="w-5 h-5 rounded-full spinner-ring mb-2 opacity-50"></div>
@@ -800,7 +805,6 @@
           if (entry.isIntersecting) {
             renderSlotCanvas(pageNum);
           } else {
-            // Memory optimization for 500+ pages on mobile
             recycleFarCanvas(pageNum);
           }
         });
@@ -827,9 +831,8 @@
         const containerWidth = slot.clientWidth || pagesFeed.clientWidth || window.innerWidth;
         const unscaledViewport = page.getViewport({ scale: 1 });
         
-        // Exact 100% fluid responsive width scaling
         const fitScale = containerWidth / unscaledViewport.width;
-        const dpr = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for mobile battery/RAM efficiency
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const viewport = page.getViewport({ scale: fitScale * dpr });
 
         canvas.width = Math.floor(viewport.width);
@@ -837,7 +840,6 @@
 
         const ctx = canvas.getContext('2d', { alpha: false });
         
-        // Cancel existing task if any
         if (state.activeRenderTasks.has(pageNum)) {
           state.activeRenderTasks.get(pageNum).cancel();
         }
@@ -852,7 +854,6 @@
         await renderTask.promise;
         state.activeRenderTasks.delete(pageNum);
 
-        // Swap skeleton with crisp rendered canvas
         const skeleton = slot.querySelector('.slot-skeleton');
         if (skeleton) skeleton.classList.add('hidden');
         canvas.classList.remove('hidden');
@@ -866,8 +867,7 @@
     }
 
     function recycleFarCanvas(pageNum) {
-      // Recycle canvases located far away from current viewport to preserve iOS RAM limits
-      if (Math.abs(pageNum - state.currentPage) > 10 && state.renderedPages.has(pageNum)) {
+      if (Math.abs(pageNum - state.currentPage) > 8 && state.renderedPages.has(pageNum)) {
         const slot = document.getElementById(`page-slot-${pageNum}`);
         const canvas = document.getElementById(`page-canvas-${pageNum}`);
         if (canvas) {
@@ -887,7 +887,7 @@
       scrollDebounceTimer = setTimeout(() => {
         detectActiveVisiblePage();
         scrollDebounceTimer = null;
-      }, 80);
+      }, 90);
     }, { passive: true });
 
     function detectActiveVisiblePage() {
@@ -904,17 +904,11 @@
           const page = parseInt(slot.dataset.page, 10);
           if (page !== state.currentPage) {
             state.currentPage = page;
-            document.getElementById('hud-current-page').value = page;
             storage.set('currentPage', page);
           }
           break;
         }
       }
-    }
-
-    function scrollByPages(delta) {
-      const target = Math.max(1, Math.min(state.totalPages, state.currentPage + delta));
-      jumpToSlot(target);
     }
 
     function jumpToSlot(pageNum, smooth = true) {
@@ -928,14 +922,17 @@
           block: 'start'
         });
         state.currentPage = num;
-        document.getElementById('hud-current-page').value = num;
         storage.set('currentPage', num);
         closeAllDrawers();
       }
     }
 
-    function scrollToTop() {
-      scrollViewport.scrollTo({ top: 0, behavior: 'smooth' });
+    function handleDirectJump() {
+      const input = document.getElementById('direct-page-input');
+      if (input && input.value) {
+        jumpToSlot(input.value);
+        input.value = '';
+      }
     }
 
     function applyDocumentFilters() {
@@ -958,8 +955,8 @@
       }
 
       let hudText = 'FILTER: NONE';
-      if (state.filter.invert && state.filter.grayscale) hudText = 'FILTER: OBSIDIAN E-INK (PAGES ONLY)';
-      else if (state.filter.invert) hudText = 'FILTER: NIGHT INVERT (PAGES ONLY)';
+      if (state.filter.invert && state.filter.grayscale) hudText = 'FILTER: OLED E-INK (PAGES ONLY)';
+      else if (state.filter.invert) hudText = 'FILTER: OLED INVERT (PAGES ONLY)';
       else if (state.filter.grayscale) hudText = 'FILTER: GRAYSCALE';
 
       filterHudText.textContent = hudText;
@@ -983,10 +980,6 @@
       showToast(state.filter.grayscale ? 'Grayscale Filter Enabled' : 'Grayscale Disabled');
     }
 
-    function toggleWidthMode() {
-      setWidthMode(state.widthMode === 'flush' ? 'comfort' : 'flush');
-    }
-
     function setWidthMode(mode) {
       state.widthMode = mode;
       storage.set('widthMode', mode);
@@ -996,17 +989,16 @@
 
       if (mode === 'flush') {
         pagesFeed.className = 'w-full mx-auto flex flex-col items-center gap-0 py-0 px-0 transition-[max-width] duration-150';
-        btnFlush.classList.add('border-obsidian-borderFocus');
-        btnComfort.classList.remove('border-obsidian-borderFocus');
+        if (btnFlush) btnFlush.classList.add('border-obsidian-borderFocus');
+        if (btnComfort) btnComfort.classList.remove('border-obsidian-borderFocus');
         showToast('Flush Full-Width Mode');
       } else {
         pagesFeed.className = 'w-full max-w-3xl mx-auto flex flex-col items-center gap-2 sm:gap-3 py-2 sm:py-4 px-0 sm:px-2 transition-[max-width] duration-150';
-        btnComfort.classList.add('border-obsidian-borderFocus');
-        btnFlush.classList.remove('border-obsidian-borderFocus');
+        if (btnComfort) btnComfort.classList.add('border-obsidian-borderFocus');
+        if (btnFlush) btnFlush.classList.remove('border-obsidian-borderFocus');
         showToast('Comfort Reading Margins');
       }
 
-      // Re-render visible pages at new width
       clearTimeout(window._resizeRerender);
       window._resizeRerender = setTimeout(() => {
         state.renderedPages.clear();
@@ -1078,10 +1070,7 @@
           <button 
             onclick="removeBookmark('${bm.id}')" 
             class="w-6 h-6 flex items-center justify-center text-obsidian-dim hover:text-red-400 transition-colors">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
+            ✕
           </button>
         `;
         list.appendChild(item);
@@ -1092,7 +1081,7 @@
       const pageInput = document.getElementById('bm-page-input');
       const labelInput = document.getElementById('bm-label-input');
       const page = parseInt(pageInput.value, 10) || state.currentPage;
-      const label = labelInput.value.trim() || `Session Note (Page ${page})`;
+      const label = labelInput.value.trim() || `Session Mark (Page ${page})`;
 
       const newBm = {
         id: 'bm_' + Date.now(),
@@ -1124,14 +1113,14 @@
       const paneBm = document.getElementById('pane-bookmarks');
 
       if (tab === 'toc') {
-        tocBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-obsidian-text border border-obsidian-border transition-colors';
-        bmBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-obsidian-text transition-colors border border-transparent';
+        tocBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-white border border-obsidian-border transition-colors';
+        bmBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-white transition-colors border border-transparent';
         searchBox.classList.remove('hidden');
         paneToc.classList.remove('hidden');
         paneBm.classList.add('hidden');
       } else {
-        bmBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-obsidian-text border border-obsidian-border transition-colors';
-        tocBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-obsidian-text transition-colors border border-transparent';
+        bmBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader bg-obsidian-card text-white border border-obsidian-border transition-colors';
+        tocBtn.className = 'flex-1 py-1.5 text-[11px] font-medium rounded-reader text-obsidian-muted hover:text-white transition-colors border border-transparent';
         searchBox.classList.add('hidden');
         paneToc.classList.add('hidden');
         paneBm.classList.remove('hidden');
@@ -1176,7 +1165,7 @@
     function confirmClearNotes() {
       showCustomModal(
         'Clear Scratchpad?',
-        'Erase all notes currently in your study scratchpad? This action cannot be undone.',
+        'Erase all notes currently in your study scratchpad? This cannot be undone.',
         () => {
           state.notes = '';
           storage.set('notes', '');
@@ -1203,21 +1192,11 @@
       reader.readAsArrayBuffer(file);
     }
 
-    function updateCustomUrl() {
-      const val = document.getElementById('custom-source-url').value.trim();
-      if (!val) return showToast('Please enter a valid URL');
-      state.pdfUrl = val;
-      storage.set('pdfUrl', val);
-      loadPdfDocument(val);
-      closeAllDrawers();
-    }
-
     function handleDocumentLoadError(err) {
-      showToast('CORS restricted on CDN. Using CORS-safe gateway...');
-      // Transparent proxy fallback for browsers enforcing strict cross-origin blocks
+      showToast('CORS restricted on CDN. Using CORS gateway...');
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(state.pdfUrl)}`;
       loadPdfDocument(proxyUrl).catch(() => {
-        showToast('Please choose local PDF or check URL');
+        showToast('Please upload local PDF file from Settings');
       });
     }
 
@@ -1267,6 +1246,7 @@
       if (!isFullscreen) {
         if (doc.requestFullscreen) doc.requestFullscreen().catch(() => showToast('Fullscreen blocked by browser'));
         else if (doc.webkitRequestFullscreen) doc.webkitRequestFullscreen();
+        else showToast('iOS Tip: Tap Share → "Add to Home Screen"');
       } else {
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
@@ -1289,7 +1269,7 @@
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 250);
-      }, 2400);
+      }, 2200);
     }
 
     function showCustomModal(title, message, onConfirm) {
@@ -1322,22 +1302,18 @@
 
     document.addEventListener('keydown', (e) => {
       const tag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+      if (tag === 'INPUT' || tag === 'TEXTAREA') {
         if (e.key === 'Escape') document.activeElement.blur();
         return;
       }
 
       if (e.key === 'Escape') closeAllDrawers();
-      else if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); scrollByPages(1); }
-      else if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); scrollByPages(-1); }
       else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFullscreen(); }
       else if (e.key === 'g' || e.key === 'G') { e.preventDefault(); toggleGrayscale(); }
       else if (e.key === 'i' || e.key === 'I') { e.preventDefault(); toggleInvert(); }
-      else if (e.key === 'w' || e.key === 'W') { e.preventDefault(); toggleWidthMode(); }
       else if (e.key === 'b' || e.key === 'B') { e.preventDefault(); toggleDrawer('left'); }
     });
 
-    // Auto-recalculate canvas resolution on window resize or mobile orientation switch
     window.addEventListener('resize', () => {
       clearTimeout(window._viewportResizeTimer);
       window._viewportResizeTimer = setTimeout(() => {
