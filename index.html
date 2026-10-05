@@ -229,10 +229,262 @@
       box-shadow: 0 0 8px #57F287;
       flex-shrink: 0;
     }
+
+    /* Danger / Fraud Color Psychology */
+    .danger-glow {
+      box-shadow: 0 0 35px rgba(239, 68, 68, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    }
+    .danger-border-pulse {
+      animation: dangerPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes dangerPulse {
+      0%, 100% { border-color: rgba(239, 68, 68, 0.4); }
+      50% { border-color: rgba(239, 68, 68, 0.85); box-shadow: 0 0 25px rgba(239, 68, 68, 0.35); }
+    }
+    .hazard-stripe {
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(239, 68, 68, 0.12),
+        rgba(239, 68, 68, 0.12) 8px,
+        transparent 8px,
+        transparent 16px
+      );
+    }
   </style>
 </head>
 
 <body class="flex flex-col h-full w-full bg-obsidian-black font-sans antialiased text-obsidian-text overflow-hidden select-none">
+
+  <!-- =========================================================================
+       THREE-STEP ANTI-TAMPER SECURITY & COMMUNITY VERIFICATION OVERLAY
+       ========================================================================= -->
+  <div 
+    id="security-overlay" 
+    class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/95 backdrop-blur-md transition-opacity duration-300">
+    
+    <!-- STEP 1: SECURITY ADVISORY (DANGER & FRAUD ALERT + IMAGE EVIDENCE PLACEHOLDER) -->
+    <div 
+      id="sec-step-1" 
+      class="w-full max-w-md max-h-[92dvh] overflow-y-auto bg-gradient-to-b from-[#1c0808] via-[#120606] to-[#090303] border danger-border-pulse rounded-2xl p-4 sm:p-5 danger-glow flex flex-col space-y-3.5 text-center relative transition-all duration-200">
+      
+      <!-- Danger Strip Header -->
+      <div class="hazard-stripe -mx-4 -mt-4 sm:-mx-5 sm:-mt-5 h-2.5 rounded-t-2xl border-b border-red-500/30"></div>
+
+      <!-- Alert Icon & Badge -->
+      <div class="mx-auto flex flex-col items-center">
+        <div class="w-12 h-12 rounded-full bg-red-950/80 border-2 border-red-500 flex items-center justify-center text-red-400 mb-2 shadow-[0_0_20px_rgba(239,68,68,0.5)]">
+          <svg class="w-6 h-6 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+            <line x1="12" y1="9" x2="12" y2="13"></line>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-900/40 border border-red-500/60 text-[10px] font-mono font-bold tracking-wider text-red-300 uppercase">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+          CRITICAL SECURITY ADVISORY
+        </div>
+      </div>
+
+      <!-- Danger Title -->
+      <div>
+        <h2 class="text-[17px] sm:text-[18px] font-extrabold text-white tracking-tight leading-snug">
+          DO NOT TRUST CIRCULATED LINKS
+        </h2>
+        <p class="text-[11px] sm:text-[12px] text-red-200/90 font-medium mt-1 leading-relaxed">
+          Dont trust the links circulated by Pickme girls like Riri (dyettcoke) and Catfishes like Nick atleast
+        </p>
+      </div>
+
+      <!-- FLAGGED EVIDENCE: SCREENSHOT OF UNAUTHORIZED CHANNELS / CIRCULATORS -->
+      <div class="w-full bg-[#100404] border border-red-500/40 rounded-xl overflow-hidden p-1.5 relative group">
+        <div class="text-[9px] font-mono text-red-300/80 uppercase tracking-widest text-left mb-1.5 px-1 flex items-center justify-between">
+          <span class="flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+            ⚠️ Flagged Unauthorized Account / Link Source
+          </span>
+          <span class="text-red-400 font-bold bg-red-950/80 px-1.5 py-0.5 rounded border border-red-500/30">FLAGGED</span>
+        </div>
+        
+        <!-- Live Evidence Screenshot -->
+        <a href="https://i.ibb.co/3Y0vFjQt/screenshot-20261005-091242-region.png" target="_blank" rel="noopener noreferrer" class="block relative overflow-hidden rounded-lg bg-black/60 group cursor-zoom-in" title="Tap to view full screenshot">
+          <img 
+            id="advisory-evidence-img"
+            src="https://i.ibb.co/3Y0vFjQt/screenshot-20261005-091242-region.png" 
+            alt="Evidence of unauthorized link circulator account"
+            class="w-full max-h-56 sm:max-h-64 object-contain rounded-lg border border-red-900/60 transition-transform duration-200 group-hover:scale-[1.01]"
+            onerror="this.src='https://placehold.co/600x320/220505/f87171?text=Evidence+Screenshot+Unavailable';" />
+          <div class="absolute bottom-1 right-1.5 bg-black/80 backdrop-blur-sm text-[8px] font-mono text-red-300 px-1.5 py-0.5 rounded border border-red-500/20">
+            🔍 Tap to expand
+          </div>
+        </a>
+        
+        <div class="text-[9px] text-red-400/80 text-left mt-1.5 px-1">
+          * Anyone charging money or claiming ownership of this digital tool is misleading you.
+        </div>
+      </div>
+
+      <!-- Student Safety Notes -->
+      <div class="bg-red-950/30 border border-red-500/20 rounded-xl p-2.5 text-left text-[11px] text-red-100/90 leading-relaxed space-y-1">
+        <p class="flex items-start gap-1.5">
+          <span class="text-red-400 font-bold">✖</span>
+          <span>Never pay anyone for access. This tool is completely free.</span>
+        </p>
+        <p class="flex items-start gap-1.5">
+          <span class="text-red-400 font-bold">✖</span>
+          <span>Do not open suspicious modified clones or unverified shortened URLs.</span>
+        </p>
+      </div>
+
+      <!-- Step 1 Button: Proceeds to Step 2 -->
+      <button 
+        onclick="goToStep2()" 
+        class="w-full py-2.5 px-4 bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-bold text-[13px] rounded-xl shadow-lg shadow-red-900/50 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+        <span>Acknowledge & Continue</span>
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </button>
+
+      <div class="text-[10px] font-mono text-zinc-500">
+        STEP 1 OF 3 • VERIFICATION PIPELINE
+      </div>
+    </div>
+
+    <!-- STEP 2: MESSAGE TO THOSE WHO CIRCULATE & STEAL LINKS -->
+    <div 
+      id="sec-step-2" 
+      class="w-full max-w-md max-h-[92dvh] overflow-y-auto bg-gradient-to-b from-[#140f06] via-[#0d0903] to-[#070502] border border-amber-500/50 rounded-2xl p-4 sm:p-5 shadow-[0_0_35px_rgba(245,158,11,0.25)] flex-col space-y-3.5 text-center relative hidden transition-all duration-200">
+      
+      <!-- Amber Header Accent -->
+      <div class="-mx-4 -mt-4 sm:-mx-5 sm:-mt-5 h-2 rounded-t-2xl bg-amber-500/80"></div>
+
+      <!-- Notice Badge -->
+      <div class="mx-auto flex flex-col items-center">
+        <div class="w-12 h-12 rounded-full bg-amber-950/70 border-2 border-amber-500 flex items-center justify-center text-amber-400 mb-2 shadow-[0_0_20px_rgba(245,158,11,0.35)]">
+          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-900/40 border border-amber-500/50 text-[10px] font-mono font-bold tracking-wider text-amber-300 uppercase">
+          DIRECT NOTICE TO SCRAPERS
+        </div>
+      </div>
+
+      <!-- Warning Title -->
+      <div>
+        <h2 class="text-[17px] font-extrabold text-white tracking-tight leading-snug">
+          To Those Who Steal & Circulate Our Links:
+        </h2>
+        <p class="text-[11px] text-amber-200/80 font-mono mt-1">
+          Stop stripping curator credits and redistributing private mirrors.
+        </p>
+      </div>
+
+      <!-- Warning Message Body -->
+      <div class="bg-amber-950/20 border border-amber-500/30 rounded-xl p-3 text-left space-y-2 text-[11px] text-amber-100/90 leading-relaxed">
+        <p>
+          This dedicated web app and continuous document pipeline were designed and maintained by 
+          <strong class="text-white font-bold">Kavy-Codes / krush91</strong> for serious vocabulary learners.
+        </p>
+        <p class="text-amber-200/80">
+          Re-hosting without attribution, passing off our hard work as your own on Telegram/WhatsApp channels, or putting our tools behind monetized link shorteners is strictly monitored.
+        </p>
+        <p class="text-white font-medium">
+          If you want to share this reader with your students or study group, share the <strong class="text-amber-300">Official Discord Server link</strong> so learners always receive genuine, untampered updates.
+        </p>
+      </div>
+
+      <!-- Step 2 Button: Proceeds to Step 3 -->
+      <button 
+        onclick="goToStep3()" 
+        class="w-full py-2.5 px-4 bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white font-bold text-[13px] rounded-xl shadow-lg shadow-amber-900/40 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+        <span>I Understand & Agree → Proceed</span>
+      </button>
+
+      <div class="text-[10px] font-mono text-zinc-500">
+        STEP 2 OF 3 • CEASE NOTICE
+      </div>
+    </div>
+
+    <!-- STEP 3: OFFICIAL HUB GATEWAY (READER ON TOP, DISCORD BUTTON BELOW) -->
+    <div 
+      id="sec-step-3" 
+      class="w-full max-w-md max-h-[92dvh] overflow-y-auto bg-gradient-to-b from-[#111224] via-[#0c0d18] to-[#07070e] border border-indigo-500/40 rounded-2xl p-4 sm:p-5 shadow-[0_0_40px_rgba(88,101,242,0.3)] flex-col space-y-3.5 text-center relative hidden transition-all duration-200">
+      
+      <!-- Top Indigo Accent -->
+      <div class="-mx-4 -mt-4 sm:-mx-5 sm:-mt-5 h-2 rounded-t-2xl bg-indigo-500"></div>
+
+      <!-- Community Badge -->
+      <div class="mx-auto flex flex-col items-center">
+        <div class="w-12 h-12 rounded-full bg-indigo-950/80 border-2 border-indigo-500 flex items-center justify-center text-white mb-2 shadow-[0_0_20px_rgba(88,101,242,0.5)]">
+          <svg class="w-7 h-7 text-indigo-400" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+        </div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-500/20 border border-indigo-500/40 text-[10px] font-mono font-bold tracking-wider text-indigo-300 uppercase">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_#34d399]"></span>
+          OFFICIAL VERIFIED HUB
+        </div>
+      </div>
+
+      <!-- Hub Content -->
+      <div>
+        <h2 class="text-[17px] font-extrabold text-white tracking-tight leading-snug">
+          Access Genuine Resources & Discussion
+        </h2>
+        <p class="text-[11px] text-slate-300 mt-1 leading-relaxed">
+          Join to receive untampered links, session vocabulary tests, root-word drills, and direct developer support.
+        </p>
+      </div>
+
+      <!-- Verified Curator Info Box -->
+      <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 flex items-center justify-between text-left">
+        <div class="flex flex-col">
+          <span class="text-[10px] font-mono text-zinc-400 uppercase tracking-wider">Official Curator</span>
+          <span class="text-[12px] font-bold text-white">Kavy-Codes / krush91</span>
+        </div>
+        <div class="text-right">
+          <span class="text-[9px] font-mono text-zinc-400 block uppercase">Discord ID</span>
+          <span class="text-[10px] font-mono bg-indigo-950/80 border border-indigo-500/40 text-indigo-300 px-2 py-0.5 rounded">930434072449257502</span>
+        </div>
+      </div>
+
+      <!-- ACTION BUTTONS: READER BUTTON ON TOP, DISCORD BUTTON BELOW -->
+      <div class="space-y-2.5 pt-1">
+        
+        <!-- BUTTON 1 (ABOVE): CONTINUE TO THE READER -->
+        <button 
+          onclick="enterReader()" 
+          class="w-full py-3 px-4 bg-white hover:bg-zinc-200 text-black font-extrabold text-[13px] rounded-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+          <span>Continue to the Reader</span>
+          <svg class="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+
+        <!-- BUTTON 2 (BELOW): JOIN OFFICIAL DISCORD SERVER -->
+        <a 
+          href="https://discord.com/invite/jEWhUtJNE" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-[13px] rounded-xl shadow-lg shadow-indigo-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 border border-indigo-400/40">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+          <span>Join Official Discord Server</span>
+        </a>
+      </div>
+
+      <div class="text-[10px] font-mono text-zinc-500">
+        STEP 3 OF 3 • OFFICIAL COMMUNITY
+      </div>
+    </div>
+
+  </div>
 
   <!-- TOP APP BAR -->
   <header class="header-safe flex-none h-[48px] bg-obsidian-base border-b border-obsidian-border flex items-center justify-between z-30 px-3 relative">
@@ -1298,6 +1550,37 @@
       cancelBtn.addEventListener('click', hideModal);
       modal.classList.remove('hidden');
       requestAnimationFrame(() => modal.classList.remove('opacity-0'));
+    }
+
+    function goToStep2() {
+      const step1 = document.getElementById('sec-step-1');
+      const step2 = document.getElementById('sec-step-2');
+      if (step1 && step2) {
+        step1.classList.add('hidden');
+        step2.classList.remove('hidden');
+        step2.classList.add('flex');
+      }
+    }
+
+    function goToStep3() {
+      const step2 = document.getElementById('sec-step-2');
+      const step3 = document.getElementById('sec-step-3');
+      if (step2 && step3) {
+        step2.classList.add('hidden');
+        step3.classList.remove('hidden');
+        step3.classList.add('flex');
+      }
+    }
+
+    function enterReader() {
+      const overlay = document.getElementById('security-overlay');
+      if (overlay) {
+        overlay.classList.add('opacity-0', 'pointer-events-none');
+        setTimeout(() => {
+          overlay.remove();
+        }, 300);
+      }
+      showToast('Welcome to Word Power Made Easy');
     }
 
     document.addEventListener('keydown', (e) => {
